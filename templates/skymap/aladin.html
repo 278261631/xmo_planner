@@ -1,0 +1,340 @@
+<!doctype html>
+{% load static %}
+<html>
+<head>
+    <meta name="viewport" content="width=device-width, height=device-height, initial-scale=1.0, user-scalable=no">
+      <meta charset="utf-8">
+  <title>计划生成</title>
+  <link rel="shortcut icon" type="image/png" href="{% static 'favicon.ico' %}"/>
+
+  <!-- Google Font: Source Sans Pro -->
+  <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Source+Sans+Pro:300,400,400i,700&display=fallback">
+    <!-- DataTables -->
+  <link rel="stylesheet" href="{% static 'plugins/datatables-bs4/css/dataTables.bootstrap4.min.css' %}">
+  <link rel="stylesheet" href="{% static 'plugins/datatables-responsive/css/responsive.bootstrap4.min.css' %}">
+  <link rel="stylesheet" href="{% static 'plugins/datatables-buttons/css/buttons.bootstrap4.min.css' %}">
+  <link rel="stylesheet" href="{% static 'plugins/tempusdominus-bootstrap-4/css/tempusdominus-bootstrap-4.min.css' %}">
+  <link rel="stylesheet" href="{% static 'plugins/fontawesome-free/css/all.min.css' %}">
+  <link rel="stylesheet" href="{% static 'plugins/toastr/toastr.min.css' %}">
+  <link rel="stylesheet" href="{% static 'dist/css/adminlte.min.css' %}">
+</head>
+<body class="hold-transition sidebar-mini sidebar-collapse">
+<div class="wrapper">
+  <!-- Navbar -->
+  <nav class="main-header navbar navbar-expand navbar-white navbar-light">
+    <!-- Left navbar links -->
+    <ul class="navbar-nav">
+      <li class="nav-item">
+        <a class="nav-link" data-widget="pushmenu" href="#" role="button"><i class="fas fa-bars"></i></a>
+      </li>
+      <li class="nav-item d-none d-sm-inline-block">
+        <a href="#" class="nav-link">Home</a>
+      </li>
+      <li class="nav-item d-none d-sm-inline-block">
+        <a href="#" class="nav-link">Contact</a>
+      </li>
+      <li class="nav-item d-none d-sm-inline-block">
+        <div class="form-group">
+            <div class="input-group date" id="req_date_picker" data-target-input="nearest">
+                <input type="text" id="req_date" class="form-control datetimepicker-input" data-target="#req_date_picker"/>
+                <div class="input-group-append" data-target="#req_date_picker" data-toggle="datetimepicker">
+                    <div class="input-group-text"><i class="fa fa-calendar"></i></div>
+                </div>
+            </div>
+        </div>
+      </li>
+    </ul>
+
+    <!-- Right navbar links -->
+    <ul class="navbar-nav ml-auto">
+
+      <!-- Messages Dropdown Menu -->
+
+      <!-- Notifications Dropdown Menu -->
+      <li class="nav-item dropdown">
+        <a class="nav-link" data-toggle="dropdown" href="#">
+          <i class="far fa-bell"></i>
+          <span class="badge badge-warning navbar-badge">15</span>
+        </a>
+        <div class="dropdown-menu dropdown-menu-lg dropdown-menu-right">
+          <span class="dropdown-item dropdown-header">15 Notifications</span>
+          <div class="dropdown-divider"></div>
+          <a href="#" class="dropdown-item">
+            <i class="fas fa-envelope mr-2"></i> -----
+            <span class="float-right text-muted text-sm">3 mins</span>
+          </a>
+          <div class="dropdown-divider"></div>
+          <a href="#" class="dropdown-item">
+            <i class="fas fa-users mr-2"></i> =========
+            <span class="float-right text-muted text-sm">12 hours</span>
+          </a>
+          <div class="dropdown-divider"></div>
+          <a href="#" class="dropdown-item">
+            <i class="fas fa-file mr-2"></i> ========
+            <span class="float-right text-muted text-sm">2 days</span>
+          </a>
+          <div class="dropdown-divider"></div>
+          <a href="#" class="dropdown-item dropdown-footer">See All Notifications</a>
+        </div>
+      </li>
+      <li class="nav-item">
+        <a class="nav-link" data-widget="fullscreen" href="#" role="button">
+          <i class="fas fa-expand-arrows-alt"></i>
+        </a>
+      </li>
+      <li class="nav-item">
+        <a class="nav-link" data-widget="control-sidebar" data-slide="true" href="#" role="button">
+          <i class="fas fa-th-large"></i>
+        </a>
+      </li>
+    </ul>
+  </nav>
+  <!-- /.navbar -->
+
+  <!-- Main Sidebar Container -->
+  <aside class="main-sidebar sidebar-dark-primary elevation-4">
+    <!-- Brand Logo -->
+    <a href="#" class="brand-link">
+      <img src="{% static 'dist/img/logo.png' %}" alt="" class="brand-image img-circle elevation-3" style="opacity: .8">
+      <span class="brand-text font-weight-light">KATS</span>
+    </a>
+
+    <!-- Sidebar -->
+    <div class="sidebar">
+
+      <!-- Sidebar Menu -->
+      <nav class="mt-2">
+        <ul class="nav nav-pills nav-sidebar flex-column" data-widget="treeview" role="menu" data-accordion="false">
+          <li class="nav-item menu-open">
+            <a href="#" class="nav-link active">
+              <i class="nav-icon fas fa-table"></i>
+              <p>
+                列表
+                <i class="fas fa-angle-left right"></i>
+              </p>
+            </a>
+            <ul class="nav nav-treeview">
+              <li class="nav-item">
+                <a href="#" class="nav-link active">
+                  <i class="far fa-circle nav-icon"></i>
+                  <p>--</p>
+                </a>
+              </li>
+            </ul>
+          </li>
+
+        </ul>
+      </nav>
+      <!-- /.sidebar-menu -->
+    </div>
+    <!-- /.sidebar -->
+  </aside>
+
+  <!-- Content Wrapper. Contains page content -->
+  <div class="content-wrapper">
+    <!-- Main content -->
+    <section class="content">
+      <div class="container-fluid">
+        <div class="row">
+          <div class="col-md-12">
+            <div class="card">
+{#              <div class="card-header">#}
+{#                <h3 class="card-title">aladin 星图</h3>#}
+{#              </div>#}
+              <!-- /.card-header -->
+              <div class="card-body">
+                  <div id="aladin-lite-div" style="width: 1000px; height: 600px"></div>
+              </div><!-- /.card-body -->
+            </div>
+            <!-- /.card -->
+
+          </div>
+          <!-- /.col -->
+
+        </div>
+        <!-- /.row -->
+        <div class="row">
+            <div class="col-md-12">
+                <div class="input-group-append">
+                  <button id="add-marker-button" class="btn btn-default">
+                    <i class="fas fa-check-circle">添加标记点</i>
+                  </button>
+                    <span class="">&nbsp;&nbsp;</span>
+                  <button id="draw-sun-button" class="btn btn-default">
+                    <i class="fas fa-check-circle">获取太阳位置</i>
+                  </button>
+                    <span class="">&nbsp;&nbsp;</span>
+                  <button id="draw-curve-button" class="btn btn-default">
+                    <i class="fas fa-check-circle">绘制曲线</i>
+                  </button>
+                </div>
+            </div>
+        </div>
+
+
+        </div><!-- /.container-fluid -->
+
+    </section>
+    <!-- /.content -->
+  </div>
+  <!-- /.content-wrapper -->
+
+  <!-- Control Sidebar -->
+  <aside class="control-sidebar control-sidebar-dark">
+    <!-- Control sidebar content goes here -->
+  </aside>
+  <!-- /.control-sidebar -->
+</div>
+<!-- ./wrapper -->
+
+<!-- jQuery -->
+<script src="{% static 'plugins/jquery/jquery.min.js' %}"></script>
+<script src="{% static 'plugins/jquery-validation/jquery.validate.min.js' %}"></script>
+<script src="{% static 'plugins/jquery-validation/additional-methods.min.js' %}"></script>
+<!-- Bootstrap 4 -->
+<script src="{% static 'plugins/bootstrap/js/bootstrap.bundle.min.js' %}"></script>
+<script src="{% static 'plugins/datatables/jquery.dataTables.min.js' %}"></script>
+<script src="{% static 'plugins/datatables-bs4/js/dataTables.bootstrap4.min.js' %}"></script>
+
+<script src="{% static 'plugins/toastr/toastr.min.js' %}"></script>
+<!-- AdminLTE App -->
+<script src="{% static 'dist/js/adminlte.min.js' %}"></script>
+<script src="{% static 'plugins/moment/moment.min.js' %}"></script>
+<script src="{% static 'plugins/inputmask/jquery.inputmask.min.js' %}"></script>
+<script src="{% static 'plugins/tempusdominus-bootstrap-4/js/tempusdominus-bootstrap-4.min.js' %}"></script>
+<!-- AdminLTE for demo purposes -->
+<script src="{% static 'dist/js/demo.js' %}"></script>
+<script type="text/javascript" src="{% static 'skymap/aladin.umd.cjs' %}" charset="utf-8"></script>
+<script type="text/javascript">
+    var aladin;
+    A.init.then(() => {
+        aladin = A.aladin('#aladin-lite-div', {fov: 180, projection: "AIT", fullScreen: false,
+            expandLayersControl: false, cooFrame: 'equatorial', showProjectionControl: true,
+            showCooGridControl: true, showSimbadPointerControl: true, showCooGrid: true, showShareControl:false,
+            showGotoControl:true, target: 'Sun', showContextMenu: true});
+
+        // manage URL parameters
+        const searchParams = new URL(document.location).searchParams;
+        if (searchParams.has('baseImageLayer')) {
+            aladin.setBaseImageLayer(searchParams.get('baseImageLayer'));
+        }
+        if (searchParams.has('overlayImageLayer')) {
+            aladin.setOverlayImageLayer(searchParams.get('overlayImageLayer'));
+        }
+        if (searchParams.has('cooFrame')) {
+            aladin.setFrame(searchParams.get('cooFrame'));
+        }
+        if (searchParams.has('fov')) {
+            aladin.setFoV(parseFloat(searchParams.get('fov')));
+        }
+        if (searchParams.has('ra') && searchParams.has('dec')) {
+            aladin.gotoRaDec(parseFloat(searchParams.get('ra')), parseFloat(searchParams.get('dec')));
+        }
+        if (searchParams.has('showReticle')) {
+            aladin.showReticle(searchParams.get('showReticle')==='true');
+        }
+        if (searchParams.has('projection')) {
+            aladin.setProjection(searchParams.get('projection'));
+        }
+        if (searchParams.has('showCooGrid')) {
+            const b = searchParams.get('showCooGrid') === 'true';
+            aladin.view.setGridConfig({
+                enabled: b
+            });
+        }
+		
+		var overlay = A.graphicOverlay({color: '#ee2345', lineWidth: 2});
+        aladin.addOverlay(overlay);
+        overlay.add(A.ellipse(10.6833, 41.2669, 3.33333/2, 1.1798333/2, 35));
+		overlay.add(A.polyline([ [2.29452158, 59.14978110], [10.12683778, 56.53733116], [14.1772154, 60.7167403], [21.45396446, 60.23528403], [28.59885697, 63.67010079] ]));
+		overlay.add(A.polyline([ [165.929, 61.75],[165.45, 56.38],[178.45, 53.69],[183.85 , 57.032],[193.50 , 55.959],[200.98 , 54.925],[206.88 , 49.313]]));
+		
+
+		var marker1 = A.marker(0.1, 89.9, {popupTitle: '0.1 89.9', popupDesc: 'Object type: Pulsar'});
+		var marker2 = A.marker(1, 89, {popupTitle: 'HD 164514', popupDesc: 'Object type: Star in cluster'});
+		var marker3 = A.marker(0, 90, {popupTitle: '0  90', popupDesc: 'Object type: Double star'});
+		var markerLayer = A.catalog({name: 'Some markers', sourceSize: 18,color: '#ffff11'});
+		aladin.addCatalog(markerLayer);
+		markerLayer.addSources([ marker3]);
+
+
+		var footprintLayer = A.graphicOverlay({color: '#2345ee', lineWidth: 3});
+		aladin.addOverlay(footprintLayer);
+		footprintLayer.addFootprints([A.polygon([[10.0, 10.0], [10.0, 20], [20.0, 20], [30.0, 20], [30, 10], [20, 10], [20, 0]])]);
+				
+				
+				// 获取按钮元素
+		let addButton = document.getElementById('add-marker-button');
+
+		
+		addButton.addEventListener('click', function () {
+
+			var markerRa_1 = 15.0;
+			var markerDec_1 = 25.0;
+			var markerRa_2 = 25.0;
+			var markerDec_2 = 30.0;
+
+			let marker_temp_1 = A.marker(markerRa_1, markerDec_1, {popupTitle: 'xxx', popupDesc: '--'});
+			let marker_temp_2 = A.marker(markerRa_2, markerDec_2, {popupTitle: 'xxx', popupDesc: '--'});
+
+			let markerLayer_temp = A.catalog({name: '测试点', sourceSize: 18,color: '#ffff11'});
+			aladin.addCatalog(markerLayer_temp);
+			markerLayer_temp.addSources([marker_temp_1,marker_temp_2]);
+
+
+		});
+
+
+
+    });
+    $(document).ready(function() {
+        console.log({{ req_date }})
+        const default_req_date = moment({{ req_date }},'YYYYMMDD');
+        // $('#table_tele_sys').dataTable({"paging": false});
+        $('#req_date_picker').datetimepicker({
+          format: "yyyyMMDD",
+           defaultDate: default_req_date,
+          singleDatePicker: true,
+        });
+       $("#req_date_picker").on("change.datetimepicker", ({date, oldDate}) => {
+         let req_date_url;
+         if (oldDate !== null) {
+           req_date_url = $("#req_date").val();
+           console.log(req_date_url);
+           window.location.href = "/dashboard?req_date="+req_date_url;
+         }
+        });
+
+
+       $('#draw-sun-button').on('click', function () {
+          let ex_message_ser = '';
+          $.getJSON( "draw_sun", {req_x_deg:$('#table_search_x').val()}
+            , function( data ) {
+              console.log(data);
+			let marker_sun = A.marker(data.sun_ra, data.sun_dec, {popupTitle: '太阳', popupDesc: '--'});
+			let markerLayer_sun = A.catalog({name: '太阳', sourceSize: 18,color: '#ffAA11'});
+			aladin.addCatalog(markerLayer_sun);
+			markerLayer_sun.addSources([marker_sun]);
+
+			let marker_moon = A.marker(data.moon_ra, data.moon_dec, {popupTitle: '月亮', popupDesc: '--'});
+			let markerLayer_moon = A.catalog({name: '太阳', sourceSize: 18,color: '#AAAAAA'});
+			aladin.addCatalog(markerLayer_moon);
+			markerLayer_moon.addSources([marker_moon]);
+
+            ex_message_ser = data.ex_message;
+            toastr.success('结果数目： ' +data);
+
+            if(ex_message_ser.length > 0){
+              toastr.warning(ex_message_ser);
+            }
+
+          }).fail(function() { toastr.error('服务器错误'); })
+
+
+       });
+    });
+
+</script>
+
+</body>
+</html>
