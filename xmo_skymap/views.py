@@ -1,17 +1,20 @@
 import io
 
+import matplotlib
 import numpy as np
 import pytz
 
 from astropy.coordinates import EarthLocation, AltAz, get_sun, get_moon, Angle, get_body, SkyCoord
 from astropy.time import Time
 from astropy.visualization import astropy_mpl_style, quantity_support
+from astropy.wcs.docstrings import coord
 from django.http import HttpResponse, JsonResponse
 from django.shortcuts import render
-from datetime import datetime
+from datetime import datetime, timedelta
 from django.core.cache import cache
 from django.template import loader
 import astropy.units as u
+matplotlib.use('TkAgg')
 from matplotlib import pyplot as plt
 
 
@@ -46,19 +49,44 @@ def draw_sun(request):
     location = EarthLocation(lat='39.7128', lon='116.0060')  # 纬度和经度
 
     # 获取当前时间
+    current_time = datetime.now()
+    # 获取次日凌晨0点0分的时间
+    current_time = current_time.replace(hour=0, minute=0, second=0, microsecond=0) + timedelta(days=1)
+    next_day_midnight = Time(current_time)
+
+    # 获取当前时间
     current_time = Time.now()
+    print(f"time {next_day_midnight.iso}")
+    print(f"当前时间：{next_day_midnight.strftime('%Y-%m-%d %H:%M:%S %Z')}")
     current_time_with_tz = current_time.to_datetime(pytz.timezone('Asia/Shanghai'))
     # 将观测地点和时间结合起来
     altaz = AltAz(location=location, obstime=current_time)
+    print(f"当前时间：{current_time_with_tz.strftime('%Y-%m-%d %H:%M:%S %Z')}")
+
+    # 生成前后各12小时的时间数组
+    time_array = []
+    sun_curve = []
+    moon_curve = []
+    for i in range(-12, 13):
+        time_offset = i * u.hour
+        new_time = next_day_midnight + time_offset
+        time_array.append(new_time)
+        # print(new_time)
+        line_sun = get_body('sun', new_time, location)
+        line_sun_radec = line_sun.transform_to(AltAz(location=location, obstime=new_time)).transform_to('gcrs')
+        line_moon = get_body('moon', new_time, location)
+        line_moon_radec = line_moon.transform_to(AltAz(location=location, obstime=new_time)).transform_to('gcrs')
+        sun_curve.append([str(line_sun_radec.ra.deg), str(line_sun_radec.dec.deg)])
+        moon_curve.append([str(line_moon_radec.ra.deg), str(line_moon_radec.dec.deg)])
 
     # 计算太阳的赤经和赤纬
-    sun = get_body('sun', current_time, location)
+    sun = get_body('sun', next_day_midnight, location)
     print(sun)
-    sun_radec = sun.transform_to(AltAz(location=location, obstime=current_time)).transform_to('gcrs')
+    sun_radec = sun.transform_to(AltAz(location=location, obstime=next_day_midnight)).transform_to('gcrs')
 
     # 计算月亮的赤经和赤纬
-    moon = get_body('moon', current_time, location)
-    moon_radec = moon.transform_to(AltAz(location=location, obstime=current_time)).transform_to('gcrs')
+    moon = get_body('moon', next_day_midnight, location)
+    moon_radec = moon.transform_to(AltAz(location=location, obstime=next_day_midnight)).transform_to('gcrs')
     print(moon)
     sun_ra_hms = Angle(sun_radec.ra.deg, unit=u.deg)
     moon_ra_hms = Angle(moon_radec.ra.deg, unit=u.deg)
@@ -71,11 +99,33 @@ def draw_sun(request):
     print(f"月亮的赤经（Right Ascension）：{moon_radec.ra.deg}   {moon_ra_hms.hms}   {moon_ra_hms.dms}")
     print(f"月亮的赤纬（Declination）：{moon_radec.dec.deg}")
     print(f"time {current_time.iso}")
-    print(f"当前时间：{current_time_with_tz.strftime('%Y-%m-%d %H:%M:%S %Z')}")
+    print(f"当前时间：{next_day_midnight.strftime('%Y-%m-%d %H:%M:%S %Z')}")
+
+    # 起始中心坐标（示例坐标，你可以根据实际需要修改）
+    center_ra = 180 * u.deg
+    center_dec = 0 * u.deg
+
+    # 单个区域的宽度和高度（示例值，你可以根据实际需求修改）
+    x_w = 10 * u.deg
+    y_h = 10 * u.deg
+
+    # 计算每行每列的坐标数量
+    num_x = int(360 * u.deg / x_w)
+    num_y = int(180 * u.deg / y_h)
+
+    # 创建一个空的坐标数组
+    coordinates = []
+
+    # 生成覆盖全部天空的坐标点
+    for i in range(num_x):
+        for j in range(num_y):
+            ra = center_ra + (i - num_x / 2) * x_w
+            dec = center_dec + (j - num_y / 2) * y_h
+            coordinates.append(ra, dec)
 
     return JsonResponse({'sun_ra': str(sun_radec.ra.deg), 'sun_dec': str(sun_radec.dec.deg),
                          'moon_ra': str(moon_radec.ra.deg), 'moon_dec': str(moon_radec.dec.deg),
-                         'ex_message': ex_message})
+                         'ex_message': ex_message, 'sun_curve': sun_curve, 'moon_curve': moon_curve})
 
 
 def draw_plan(request):

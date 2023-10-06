@@ -317,9 +317,29 @@
 			markerLayer_sun.addSources([marker_sun]);
 
 			let marker_moon = A.marker(data.moon_ra, data.moon_dec, {popupTitle: '月亮', popupDesc: '--'});
-			let markerLayer_moon = A.catalog({name: '太阳', sourceSize: 18,color: '#AAAAAA'});
+			let markerLayer_moon = A.catalog({name: '月', sourceSize: 18,color: '#AAAAAA'});
 			aladin.addCatalog(markerLayer_moon);
 			markerLayer_moon.addSources([marker_moon]);
+
+            let sun_curve = data.sun_curve;
+            let markers_sun = [];
+            for (let i = 0; i < sun_curve.length; i++) {
+			  let marker_sun_temp = A.marker(sun_curve[i][0], sun_curve[i][1], {popupTitle: '', popupDesc: ''});
+              markers_sun.push(marker_sun_temp)
+            }
+			let markerLayer_sun_curve = A.catalog({name: '--', sourceSize: 8,color: '#FFAA11'});
+			aladin.addCatalog(markerLayer_sun_curve);
+			markerLayer_sun_curve.addSources(markers_sun);
+
+            let moon_curve = data.moon_curve;
+            let markers_moon = [];
+            for (let i = 0; i < moon_curve.length; i++) {
+			  let marker_moon_temp = A.marker(moon_curve[i][0], moon_curve[i][1], {popupTitle: '', popupDesc: ''});
+              markers_moon.push(marker_moon_temp)
+            }
+			let markerLayer_moon_curve = A.catalog({name: '-', sourceSize: 8,color: '#AAAAAA'});
+			aladin.addCatalog(markerLayer_moon_curve);
+			markerLayer_moon_curve.addSources(markers_moon);
 
             ex_message_ser = data.ex_message;
             toastr.success('结果数目： ' +data);
