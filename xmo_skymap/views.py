@@ -4,16 +4,18 @@ import matplotlib
 import numpy as np
 import pytz
 
-from astropy.coordinates import EarthLocation, AltAz, get_sun, get_moon, Angle, get_body, SkyCoord
+from astropy.coordinates import EarthLocation, AltAz, get_sun, Angle, get_body, SkyCoord
 from astropy.time import Time
 from astropy.visualization import astropy_mpl_style, quantity_support
-from astropy.wcs.docstrings import coord
 from django.http import HttpResponse, JsonResponse
-from django.shortcuts import render
 from datetime import datetime, timedelta
 from django.core.cache import cache
 from django.template import loader
 import astropy.units as u
+
+from xmo_skymap.rotate_tools import get_l_r_t_b_axis, rotate, get_top, get_left, get_right, get_bottom, \
+    get_rotate_fix_axis, get_top_fix_axis, get_right_fix_axis, get_bottom_fix_axis, get_left_fix_axis
+
 matplotlib.use('TkAgg')
 from matplotlib import pyplot as plt
 
@@ -102,30 +104,158 @@ def draw_sun(request):
     print(f"当前时间：{next_day_midnight.strftime('%Y-%m-%d %H:%M:%S %Z')}")
 
     # 起始中心坐标（示例坐标，你可以根据实际需要修改）
-    center_ra = 180 * u.deg
-    center_dec = 0 * u.deg
+    center_ra = 30 * u.deg
+    center_dec = 80 * u.deg
 
-    # 单个区域的宽度和高度（示例值，你可以根据实际需求修改）
-    x_w = 10 * u.deg
-    y_h = 10 * u.deg
+    square_list = []
 
-    # 计算每行每列的坐标数量
-    num_x = int(360 * u.deg / x_w)
-    num_y = int(180 * u.deg / y_h)
+    # 5x4 图像，间距重叠1 中心上下间距7 左右间距9
+    num_row = 6
+    num_colum = 5
+    img_wid = 5
+    img_hei = 4
+    img_overlap = 1
+    row_head_coord_list = []
+    cen_ra_row = center_ra
+    cen_dec_row = center_dec
+    coord_debug = SkyCoord(ra=center_ra, dec=center_dec, unit='deg')
+    az_alt = coord_debug.transform_to(AltAz(obstime=current_time, location=location))
+    print('=========   az  [%s]    alt [%s]   ========' % (az_alt.az, az_alt.alt))
+    cart_debug = coord_debug.cartesian
+    print('========= xyz  (%s,%s,%s)   ========' % (cart_debug.x.value, cart_debug.y.value, cart_debug.z.value))
 
-    # 创建一个空的坐标数组
-    coordinates = []
+    # =======================================================================================
+    rtt_l, rtt_r, rtt_t, rtt_b = get_rotate_fix_axis(cen_ra_row, cen_dec_row)
 
-    # 生成覆盖全部天空的坐标点
-    for i in range(num_x):
-        for j in range(num_y):
-            ra = center_ra + (i - num_x / 2) * x_w
-            dec = center_dec + (j - num_y / 2) * y_h
-            coordinates.append(ra, dec)
+    for i in range(num_row):
+        cord_row_head_center_item = get_top_fix_axis(cen_ra_row, cen_dec_row, (img_hei-img_overlap)*i, rtt_t)
+        row_head_coord_list.append(cord_row_head_center_item)
+    for i in range(num_row):
+        center_ra_colum = row_head_coord_list[i].ra.value
+        center_dec_colum = row_head_coord_list[i].dec.value
+        for j in range(num_colum):
+            cord_t_c = get_right_fix_axis(center_ra_colum, center_dec_colum, (img_wid-img_overlap) * j, rtt_r)
+            # print('[%s]  [%s]              [%s]   [%s]' % (i, j, center_ra_colum, center_dec_colum))
+            coordinates = []
+            cord_t_c_tm = get_top_fix_axis(cord_t_c.ra.value, cord_t_c.dec.value, (img_hei/2), rtt_t)
+            cord_t_c_bm = get_bottom_fix_axis(cord_t_c.ra.value, cord_t_c.dec.value, (img_hei/2), rtt_b)
+            cord_t_c_tl = get_left_fix_axis(cord_t_c_tm.ra.value, cord_t_c_tm.dec.value, (img_wid/2), rtt_l)
+            cord_t_c_tr = get_right_fix_axis(cord_t_c_tm.ra.value, cord_t_c_tm.dec.value, (img_wid/2), rtt_r)
+            cord_t_c_bl = get_left_fix_axis(cord_t_c_bm.ra.value, cord_t_c_bm.dec.value, (img_wid/2), rtt_l)
+            cord_t_c_br = get_right_fix_axis(cord_t_c_bm.ra.value, cord_t_c_bm.dec.value, (img_wid/2), rtt_r)
+            coordinates.append([cord_t_c_tl.ra.value, cord_t_c_tl.dec.value])
+            coordinates.append([cord_t_c_tr.ra.value, cord_t_c_tr.dec.value])
+            coordinates.append([cord_t_c_br.ra.value, cord_t_c_br.dec.value])
+            coordinates.append([cord_t_c_bl.ra.value, cord_t_c_bl.dec.value])
+
+            square_list.append(coordinates)
+    # =======================================================================================
+    # for i in range(num_row):
+    #     cord_row_head_center_item = get_top(cen_ra_row, cen_dec_row, (img_hei-img_overlap)*i, current_time, location)
+    #     row_head_coord_list.append(cord_row_head_center_item)
+    # for i in range(num_row):
+    #     center_ra_colum = row_head_coord_list[i].ra.value
+    #     center_dec_colum = row_head_coord_list[i].dec.value
+    #     for j in range(num_colum):
+    #         cord_t_c = get_right(center_ra_colum, center_dec_colum, (img_wid-img_overlap) * j, current_time, location)
+    #         # print('[%s]  [%s]              [%s]   [%s]' % (i, j, center_ra_colum, center_dec_colum))
+    #         coordinates = []
+    #         cord_t_c_tm = get_top(cord_t_c.ra.value, cord_t_c.dec.value, (img_hei/2), current_time, location)
+    #         cord_t_c_bm = get_bottom(cord_t_c.ra.value, cord_t_c.dec.value, (img_hei/2), current_time, location)
+    #         cord_t_c_tl = get_left(cord_t_c_tm.ra.value, cord_t_c_tm.dec.value, (img_wid/2), current_time, location)
+    #         cord_t_c_tr = get_right(cord_t_c_tm.ra.value, cord_t_c_tm.dec.value, (img_wid/2), current_time, location)
+    #         cord_t_c_bl = get_left(cord_t_c_bm.ra.value, cord_t_c_bm.dec.value, (img_wid/2), current_time, location)
+    #         cord_t_c_br = get_right(cord_t_c_bm.ra.value, cord_t_c_bm.dec.value, (img_wid/2), current_time, location)
+    #         coordinates.append([cord_t_c_tl.ra.value, cord_t_c_tl.dec.value])
+    #         coordinates.append([cord_t_c_tr.ra.value, cord_t_c_tr.dec.value])
+    #         coordinates.append([cord_t_c_br.ra.value, cord_t_c_br.dec.value])
+    #         coordinates.append([cord_t_c_bl.ra.value, cord_t_c_bl.dec.value])
+    #
+    #         square_list.append(coordinates)
+
+    # =======================================================================================
+    # for i in range(2):
+    #     cord_row_head_center = get_top(center_ra, center_dec, 7*i, current_time, location)
+    #     center_ra = cord_t_c.ra.value
+    #     center_dec = cord_t_c.dec.value
+    #     for j in range(3):
+    #         cord_t_c = get_right(center_ra, center_dec, 9*j, current_time, location)
+    #         center_ra = cord_t_c.ra.value
+    #         center_dec = cord_t_c.dec.value
+    #         print('[%s]  [%s]              [%s]   [%s]' % (i, j, center_ra, center_dec))
+    #         coordinates = []
+    #         cord_t_c_tm = get_top(cord_t_c.ra.value, cord_t_c.dec.value, 2, current_time, location)
+    #         cord_t_c_bm = get_bottom(cord_t_c.ra.value, cord_t_c.dec.value, 2, current_time, location)
+    #         cord_t_c_tl = get_left(cord_t_c_tm.ra.value, cord_t_c_tm.dec.value, 2.5, current_time, location)
+    #         cord_t_c_tr = get_right(cord_t_c_tm.ra.value, cord_t_c_tm.dec.value, 2.5, current_time, location)
+    #         cord_t_c_bl = get_left(cord_t_c_bm.ra.value, cord_t_c_bm.dec.value, 2.5, current_time, location)
+    #         cord_t_c_br = get_right(cord_t_c_bm.ra.value, cord_t_c_bm.dec.value, 2.5, current_time, location)
+    #         coordinates.append([cord_t_c_tl.ra.value, cord_t_c_tl.dec.value])
+    #         coordinates.append([cord_t_c_tr.ra.value, cord_t_c_tr.dec.value])
+    #         coordinates.append([cord_t_c_br.ra.value, cord_t_c_br.dec.value])
+    #         coordinates.append([cord_t_c_bl.ra.value, cord_t_c_bl.dec.value])
+    #
+    #         square_list.append(coordinates)
+
+    # coord_a = SkyCoord(ra=center_ra, dec=center_dec, unit='deg')
+    # # 获取方位角和高度角
+    # az_alt = coord_a.transform_to(AltAz(obstime=current_time, location=location))
+    # print('=========   az  [%s]    alt [%s]   ========' % (az_alt.az, az_alt.alt))
+    # x_cart = coord_a.cartesian
+    # print('cart  [%s]' % x_cart)
+    # x_cart_array = np.array([x_cart.x.value, x_cart.y.value, x_cart.z.value])
+    # left_axis, right_axis, top_axis, bottom_axis = get_l_r_t_b_axis(x_cart_array, current_time, location)
+    # print('%s  %s  %s  %s  ' % (left_axis, right_axis, top_axis, bottom_axis))
+    # theta = np.pi / 18
+    # x_cart_l = rotate(x_cart_array, theta, left_axis)
+    # x_cart_r = rotate(x_cart_array, theta, right_axis)
+    # x_cart_t = rotate(x_cart_array, theta, top_axis)
+    # x_cart_b = rotate(x_cart_array, theta, bottom_axis)
+    # print('l:[%s]     r:[%s]' % (x_cart_l, x_cart_r))
+    # print('t:[%s]     b:[%s]' % (x_cart_t, x_cart_b))
+    # print('-:[%s]' % x_cart_array)
+    #
+    # # # 创建SkyCoord对象
+    # # cartesian_coord = SkyCoord(x=x * u.pc, y=y * u.pc, z=z * u.pc, frame='gcrs', representation_type='cartesian')
+    # #
+    # # # 将笛卡尔坐标转换为赤经赤纬坐标
+    # # icrs_coord = cartesian_coord.transform_to('gcrs')
+    #
+    # cart_coord_l = SkyCoord(x=x_cart_l[0] * u.pc, y=x_cart_l[1] * u.pc, z=x_cart_l[2] * u.pc,
+    #                         representation_type='cartesian')
+    # cart_coord_r = SkyCoord(x=x_cart_r[0] * u.pc, y=x_cart_r[1] * u.pc, z=x_cart_r[2] * u.pc,
+    #                         representation_type='cartesian')
+    # cart_coord_t = SkyCoord(x=x_cart_t[0] * u.pc, y=x_cart_t[1] * u.pc, z=x_cart_t[2] * u.pc,
+    #                         representation_type='cartesian')
+    # cart_coord_b = SkyCoord(x=x_cart_b[0] * u.pc, y=x_cart_b[1] * u.pc, z=x_cart_b[2] * u.pc,
+    #                         representation_type='cartesian')
+    # eq_coord_l = cart_coord_l.transform_to('gcrs')
+    # eq_coord_r = cart_coord_r.transform_to('gcrs')
+    # eq_coord_t = cart_coord_t.transform_to('gcrs')
+    # eq_coord_b = cart_coord_b.transform_to('gcrs')
+    # print('========= l:  ra  [%s]    dec [%s]   ========' % (eq_coord_l.ra, eq_coord_l.dec))
+    # print('========= r:  ra  [%s]    dec [%s]   ========' % (eq_coord_r.ra, eq_coord_r.dec))
+    # print('========= t:  ra  [%s]    dec [%s]   ========' % (eq_coord_t.ra, eq_coord_t.dec))
+    # print('========= b:  ra  [%s]    dec [%s]   ========' % (eq_coord_b.ra, eq_coord_b.dec))
+    # coordinates.append([eq_coord_l.ra.value, eq_coord_l.dec.value])
+    # coordinates.append([eq_coord_r.ra.value, eq_coord_r.dec.value])
+    # coordinates.append([eq_coord_t.ra.value, eq_coord_t.dec.value])
+    # coordinates.append([eq_coord_b.ra.value, eq_coord_b.dec.value])
+    # az_alt_l = eq_coord_l.transform_to(AltAz(obstime=current_time, location=location))
+    # az_alt_r = eq_coord_r.transform_to(AltAz(obstime=current_time, location=location))
+    # az_alt_t = eq_coord_t.transform_to(AltAz(obstime=current_time, location=location))
+    # az_alt_b = eq_coord_b.transform_to(AltAz(obstime=current_time, location=location))
+    # print('========= l:  az  [%s]    alt [%s]   ========' % (az_alt_l.az, az_alt_l.alt))
+    # print('========= r:  az  [%s]    alt [%s]   ========' % (az_alt_r.az, az_alt_r.alt))
+    # print('========= t:  az  [%s]    alt [%s]   ========' % (az_alt_t.az, az_alt_t.alt))
+    # print('========= b:  az  [%s]    alt [%s]   ========' % (az_alt_b.az, az_alt_b.alt))
+    # print('========= -:  az  [%s]    alt [%s]   ========' % (az_alt.az, az_alt.alt))
 
     return JsonResponse({'sun_ra': str(sun_radec.ra.deg), 'sun_dec': str(sun_radec.dec.deg),
                          'moon_ra': str(moon_radec.ra.deg), 'moon_dec': str(moon_radec.dec.deg),
-                         'ex_message': ex_message, 'sun_curve': sun_curve, 'moon_curve': moon_curve})
+                         'ex_message': ex_message, 'sun_curve': sun_curve, 'moon_curve': moon_curve,
+                         'center_ra': str(center_ra.value), 'center_dec': str(center_dec.value),
+                         'areas': square_list})
 
 
 def draw_plan(request):
