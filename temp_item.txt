@@ -1,0 +1,3 @@
+replace_ra_deg xxaa
+
+replace_dec_deg 大概这样：

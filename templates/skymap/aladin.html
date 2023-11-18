@@ -342,21 +342,23 @@
 			markerLayer_moon_curve.addSources(markers_moon);
 
             let plan_area = data.areas;
+            let overlay_areas = A.graphicOverlay({name: 'areas', color: '#8ebd84', lineWidth: 2});
+            aladin.addOverlay(overlay_areas);
             for(let i = 0; i < plan_area.length; i++){
                 console.log(plan_area[i]);
-                let overlay_areas = A.graphicOverlay({name: 'a_'+i, color: '#8ebd84', lineWidth: 2});
-                aladin.addOverlay(overlay_areas);
+                {#let overlay_areas = A.graphicOverlay({name: 'a_'+i, color: '#8ebd84', lineWidth: 2});#}
+                {#aladin.addOverlay(overlay_areas);#}
                 overlay_areas.addFootprints([A.polygon(plan_area[i])]);
 
-                for(let j=0; j<plan_area[i].length; j++ ){
-                    let marker_cor = A.marker(plan_area[i][j][0], plan_area[i][j][1], {popupTitle: 'Cen', popupDesc: plan_area[i][j][0]+'  '+plan_area[i][j][1]});
-                    let markerLayer_cor = A.catalog({name: 'Center', sourceSize: 14,color: '#a606f8'});
-                    aladin.addCatalog(markerLayer_cor);
-                    markerLayer_cor.addSources([marker_cor]);
-                    console.log(plan_area[i][j][0])
-                    console.log(plan_area[i][j][1])
-
-                }
+                {#for(let j=0; j<plan_area[i].length; j++ ){#}
+                {#    let marker_cor = A.marker(plan_area[i][j][0], plan_area[i][j][1], {popupTitle: 'Cen', popupDesc: plan_area[i][j][0]+'  '+plan_area[i][j][1]});#}
+                {#    let markerLayer_cor = A.catalog({name: 'Center', sourceSize: 14,color: '#a606f8'});#}
+                {#    aladin.addCatalog(markerLayer_cor);#}
+                {#    markerLayer_cor.addSources([marker_cor]);#}
+                {#    console.log(plan_area[i][j][0])#}
+                {#    console.log(plan_area[i][j][1])#}
+                {##}
+                {# }#}
             }
 
 

@@ -1,4 +1,5 @@
 import io
+import os
 
 import matplotlib
 import numpy as np
@@ -13,6 +14,7 @@ from django.core.cache import cache
 from django.template import loader
 import astropy.units as u
 
+from xmo_skymap.plan_gen_tool import load_item_template, write_plan_file
 from xmo_skymap.rotate_tools import get_l_r_t_b_axis, rotate, get_top, get_left, get_right, get_bottom, \
     get_rotate_fix_axis, get_top_fix_axis, get_right_fix_axis, get_bottom_fix_axis, get_left_fix_axis
 
@@ -104,14 +106,15 @@ def draw_sun(request):
     print(f"当前时间：{next_day_midnight.strftime('%Y-%m-%d %H:%M:%S %Z')}")
 
     # 起始中心坐标（示例坐标，你可以根据实际需要修改）
-    center_ra = 30 * u.deg
-    center_dec = 80 * u.deg
+    center_ra = 0.1 * u.deg
+    center_dec = 11.3 * u.deg
 
     square_list = []
+    center_list = []
 
     # 5x4 图像，间距重叠1 中心上下间距7 左右间距9
-    num_row = 6
-    num_colum = 5
+    num_row = 8
+    num_colum = 9
     img_wid = 5
     img_hei = 4
     img_overlap = 1
@@ -133,8 +136,10 @@ def draw_sun(request):
     for i in range(num_row):
         center_ra_colum = row_head_coord_list[i].ra.value
         center_dec_colum = row_head_coord_list[i].dec.value
+        # rtt_l, rtt_r, rtt_t, rtt_b = get_rotate_fix_axis(center_ra_colum, center_dec_colum)
         for j in range(num_colum):
             cord_t_c = get_right_fix_axis(center_ra_colum, center_dec_colum, (img_wid-img_overlap) * j, rtt_r)
+            # rtt_l, rtt_r, rtt_t, rtt_b = get_rotate_fix_axis(cord_t_c.ra.value, cord_t_c.dec.value)
             # print('[%s]  [%s]              [%s]   [%s]' % (i, j, center_ra_colum, center_dec_colum))
             coordinates = []
             cord_t_c_tm = get_top_fix_axis(cord_t_c.ra.value, cord_t_c.dec.value, (img_hei/2), rtt_t)
@@ -149,6 +154,7 @@ def draw_sun(request):
             coordinates.append([cord_t_c_bl.ra.value, cord_t_c_bl.dec.value])
 
             square_list.append(coordinates)
+            center_list.append([cord_t_c.ra.value, cord_t_c.dec.value])
     # =======================================================================================
     # for i in range(num_row):
     #     cord_row_head_center_item = get_top(cen_ra_row, cen_dec_row, (img_hei-img_overlap)*i, current_time, location)
@@ -250,6 +256,21 @@ def draw_sun(request):
     # print('========= t:  az  [%s]    alt [%s]   ========' % (az_alt_t.az, az_alt_t.alt))
     # print('========= b:  az  [%s]    alt [%s]   ========' % (az_alt_b.az, az_alt_b.alt))
     # print('========= -:  az  [%s]    alt [%s]   ========' % (az_alt.az, az_alt.alt))
+    template_root_path = "e:/test"
+    output_root_path = "e:/test"
+    now = datetime.now()
+    time_str = current_time_with_tz.strftime('%Y%m%d_%H%M%S_%Z')
+    out_path = os.path.join(output_root_path, "%s_%s.txt" % ("auto", time_str))
+    # out_path = os.path.join(output_root_path, time_str, "%s_%s.txt" % ("auto", time_str))
+
+    temp_item_file_name = "temp_item.txt"
+    temp_list_file_name = "temp_list.txt"
+    temp_item_file_path = os.path.join(template_root_path, temp_item_file_name)
+    temp_list_file_path = os.path.join(template_root_path, temp_list_file_name)
+    print("单目标模板：[%s]   计划文件模板：[%s]   输出文件:[%s]" %(temp_item_file_path, temp_list_file_path, out_path))
+    print(temp_list_file_path)
+    template_item_content = load_item_template(temp_item_file_path)
+    write_plan_file(temp_list_file_path, center_list, out_path, template_item_content)
 
     return JsonResponse({'sun_ra': str(sun_radec.ra.deg), 'sun_dec': str(sun_radec.dec.deg),
                          'moon_ra': str(moon_radec.ra.deg), 'moon_dec': str(moon_radec.dec.deg),
