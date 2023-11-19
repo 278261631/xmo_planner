@@ -364,6 +364,13 @@
 
 			let marker_cen = A.marker(data.center_ra, data.center_dec, {popupTitle: 'Cen', popupDesc: data.center_ra+'  '+data.center_dec});
 			let markerLayer_cen = A.catalog({name: 'Center', sourceSize: 10,color: '#a1e583'});
+
+            let centers_data = data.centers;;
+            for(let i = 0; i < centers_data.length; i++) {
+                let marker_cen_item = A.marker(centers_data[i][0], centers_data[i][1], {popupTitle: 'Cen', popupDesc: centers_data[i][0]+'  '+centers_data[i][1]});
+                markerLayer_cen.addSources([marker_cen_item]);
+            }
+
 			aladin.addCatalog(markerLayer_cen);
 			markerLayer_cen.addSources([marker_cen]);
             console.log(data.center_ra)

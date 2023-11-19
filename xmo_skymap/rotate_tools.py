@@ -20,8 +20,8 @@ def rotate(np_array_a, or_theta_rad, or_axis):
     ])
     # 将向量 np_array_a 与旋转矩阵相乘
     a_rotated = np.dot(r_rotate, np_array_a)
-    print("原始向量 np_array_a:", np_array_a)
-    print("旋转后的向量 a_rotated:", a_rotated)
+    # print("原始向量 np_array_a:", np_array_a)
+    # print("旋转后的向量 a_rotated:", a_rotated)
     return a_rotated
 
 
@@ -118,7 +118,7 @@ def get_l_r_t_b_axis_by_az(point_star_x):
 def get_left(c_ra_deg, c_dec_deg, theta_left_deg, obs_time=None, obs_location=None):
     center_coord = SkyCoord(ra=c_ra_deg, dec=c_dec_deg, unit='deg')
     center_cart = center_coord.cartesian
-    print('cart  [%s]' % center_cart)
+    # print('cart  [%s]' % center_cart)
     center_cart_array = np.array([center_cart.x.value, center_cart.y.value, center_cart.z.value])
     # left_axis_c, right_axis_c, top_axis_c, bottom_axis_c = get_l_r_t_b_axis(center_cart_array, obs_time, obs_location)
     left_axis_c, right_axis_c, top_axis_c, bottom_axis_c = get_l_r_t_b_axis_by_az(center_cart_array)
@@ -131,7 +131,7 @@ def get_left(c_ra_deg, c_dec_deg, theta_left_deg, obs_time=None, obs_location=No
 def get_right(c_ra_deg, c_dec_deg, theta_right, obs_time=None, obs_location=None):
     center_coord = SkyCoord(ra=c_ra_deg, dec=c_dec_deg, unit='deg')
     center_cart = center_coord.cartesian
-    print('cart  [%s]' % center_cart)
+    # print('cart  [%s]' % center_cart)
     center_cart_array = np.array([center_cart.x.value, center_cart.y.value, center_cart.z.value])
     # left_axis_c, right_axis_c, top_axis_c, bottom_axis_c = get_l_r_t_b_axis(center_cart_array, obs_time, obs_location)
     left_axis_c, right_axis_c, top_axis_c, bottom_axis_c = get_l_r_t_b_axis_by_az(center_cart_array)
@@ -144,7 +144,7 @@ def get_right(c_ra_deg, c_dec_deg, theta_right, obs_time=None, obs_location=None
 def get_top(c_ra_deg, c_dec_deg, theta_top, obs_time=None, obs_location=None):
     center_coord = SkyCoord(ra=c_ra_deg, dec=c_dec_deg, unit='deg')
     center_cart = center_coord.cartesian
-    print('cart  [%s]' % center_cart)
+    # print('cart  [%s]' % center_cart)
     center_cart_array = np.array([center_cart.x.value, center_cart.y.value, center_cart.z.value])
     # left_axis_c, right_axis_c, top_axis_c, bottom_axis_c = get_l_r_t_b_axis(center_cart_array, obs_time, obs_location)
     left_axis_c, right_axis_c, top_axis_c, bottom_axis_c = get_l_r_t_b_axis_by_az(center_cart_array)
@@ -157,7 +157,7 @@ def get_top(c_ra_deg, c_dec_deg, theta_top, obs_time=None, obs_location=None):
 def get_bottom(c_ra_deg, c_dec_deg, theta_bottom, obs_time=None, obs_location=None):
     center_coord = SkyCoord(ra=c_ra_deg, dec=c_dec_deg, unit='deg')
     center_cart = center_coord.cartesian
-    print('cart  [%s]' % center_cart)
+    # print('cart  [%s]' % center_cart)
     center_cart_array = np.array([center_cart.x.value, center_cart.y.value, center_cart.z.value])
     # left_axis_c, right_axis_c, top_axis_c, bottom_axis_c = get_l_r_t_b_axis(center_cart_array, obs_time, obs_location)
     left_axis_c, right_axis_c, top_axis_c, bottom_axis_c = get_l_r_t_b_axis_by_az(center_cart_array)
@@ -170,7 +170,7 @@ def get_bottom(c_ra_deg, c_dec_deg, theta_bottom, obs_time=None, obs_location=No
 def get_rotate_fix_axis(c_ra_deg, c_dec_deg):
     center_coord = SkyCoord(ra=c_ra_deg, dec=c_dec_deg, unit='deg')
     center_cart = center_coord.cartesian
-    print('cart  [%s]' % center_cart)
+    # print('cart  [%s]' % center_cart)
     center_cart_array = np.array([center_cart.x.value, center_cart.y.value, center_cart.z.value])
     left_axis_c, right_axis_c, top_axis_c, bottom_axis_c = get_l_r_t_b_axis_by_az(center_cart_array)
 
@@ -180,7 +180,7 @@ def get_rotate_fix_axis(c_ra_deg, c_dec_deg):
 def get_left_fix_axis(c_ra_deg, c_dec_deg, theta_left_deg, left_axis_c=None):
     center_coord = SkyCoord(ra=c_ra_deg, dec=c_dec_deg, unit='deg')
     center_cart = center_coord.cartesian
-    print('cart  [%s]' % center_cart)
+    # print('cart  [%s]' % center_cart)
     center_cart_array = np.array([center_cart.x.value, center_cart.y.value, center_cart.z.value])
     center_cart_l = rotate(center_cart_array, np.deg2rad(theta_left_deg), left_axis_c)
     cen_cart_coord_l = SkyCoord(x=center_cart_l[0] * u.pc, y=center_cart_l[1] * u.pc, z=center_cart_l[2] * u.pc,
@@ -191,7 +191,7 @@ def get_left_fix_axis(c_ra_deg, c_dec_deg, theta_left_deg, left_axis_c=None):
 def get_right_fix_axis(c_ra_deg, c_dec_deg, theta_right, right_axis_c=None):
     center_coord = SkyCoord(ra=c_ra_deg, dec=c_dec_deg, unit='deg')
     center_cart = center_coord.cartesian
-    print('cart  [%s]' % center_cart)
+    # print('cart  [%s]' % center_cart)
     center_cart_array = np.array([center_cart.x.value, center_cart.y.value, center_cart.z.value])
     center_cart_l = rotate(center_cart_array, np.deg2rad(theta_right), right_axis_c)
     cen_cart_coord_l = SkyCoord(x=center_cart_l[0] * u.pc, y=center_cart_l[1] * u.pc, z=center_cart_l[2] * u.pc,
@@ -202,7 +202,7 @@ def get_right_fix_axis(c_ra_deg, c_dec_deg, theta_right, right_axis_c=None):
 def get_top_fix_axis(c_ra_deg, c_dec_deg, theta_top, top_axis_c=None):
     center_coord = SkyCoord(ra=c_ra_deg, dec=c_dec_deg, unit='deg')
     center_cart = center_coord.cartesian
-    print('cart  [%s]' % center_cart)
+    # print('cart  [%s]' % center_cart)
     center_cart_array = np.array([center_cart.x.value, center_cart.y.value, center_cart.z.value])
     center_cart_l = rotate(center_cart_array, np.deg2rad(theta_top), top_axis_c)
     cen_cart_coord_l = SkyCoord(x=center_cart_l[0] * u.pc, y=center_cart_l[1] * u.pc, z=center_cart_l[2] * u.pc,
@@ -213,7 +213,7 @@ def get_top_fix_axis(c_ra_deg, c_dec_deg, theta_top, top_axis_c=None):
 def get_bottom_fix_axis(c_ra_deg, c_dec_deg, theta_bottom, bottom_axis_c=None):
     center_coord = SkyCoord(ra=c_ra_deg, dec=c_dec_deg, unit='deg')
     center_cart = center_coord.cartesian
-    print('cart  [%s]' % center_cart)
+    # print('cart  [%s]' % center_cart)
     center_cart_array = np.array([center_cart.x.value, center_cart.y.value, center_cart.z.value])
     center_cart_l = rotate(center_cart_array, np.deg2rad(theta_bottom), bottom_axis_c)
     cen_cart_coord_l = SkyCoord(x=center_cart_l[0] * u.pc, y=center_cart_l[1] * u.pc, z=center_cart_l[2] * u.pc,

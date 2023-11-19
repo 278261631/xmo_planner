@@ -106,18 +106,18 @@ def draw_sun(request):
     print(f"当前时间：{next_day_midnight.strftime('%Y-%m-%d %H:%M:%S %Z')}")
 
     # 起始中心坐标（示例坐标，你可以根据实际需要修改）
-    center_ra = 0.1 * u.deg
-    center_dec = 11.3 * u.deg
+    center_ra = 20.1 * u.deg
+    center_dec = 20.3 * u.deg
 
     square_list = []
     center_list = []
 
     # 5x4 图像，间距重叠1 中心上下间距7 左右间距9
-    num_row = 8
-    num_colum = 9
+    num_row = 7
+    num_colum = 20
     img_wid = 5
     img_hei = 4
-    img_overlap = 1
+    img_overlap = 0.2
     row_head_coord_list = []
     cen_ra_row = center_ra
     cen_dec_row = center_dec
@@ -129,17 +129,27 @@ def draw_sun(request):
 
     # =======================================================================================
     rtt_l, rtt_r, rtt_t, rtt_b = get_rotate_fix_axis(cen_ra_row, cen_dec_row)
-
+    rtt_l = np.array([0, 0, 1])
+    rtt_r = np.array([0, 0, -1])
+    # rtt_t = np.array([1, 0, 0])
+    # rtt_b = np.array([-1, 0, 0])
     for i in range(num_row):
         cord_row_head_center_item = get_top_fix_axis(cen_ra_row, cen_dec_row, (img_hei-img_overlap)*i, rtt_t)
         row_head_coord_list.append(cord_row_head_center_item)
     for i in range(num_row):
         center_ra_colum = row_head_coord_list[i].ra.value
         center_dec_colum = row_head_coord_list[i].dec.value
-        # rtt_l, rtt_r, rtt_t, rtt_b = get_rotate_fix_axis(center_ra_colum, center_dec_colum)
+        rtt_l, rtt_r, rtt_t, rtt_b = get_rotate_fix_axis(center_ra_colum, center_dec_colum)
+        # rtt_l = np.array([0, 0, 1])
+        # rtt_r = np.array([0, 0, -1])
+        cord_t_c = row_head_coord_list[i]
         for j in range(num_colum):
-            cord_t_c = get_right_fix_axis(center_ra_colum, center_dec_colum, (img_wid-img_overlap) * j, rtt_r)
-            # rtt_l, rtt_r, rtt_t, rtt_b = get_rotate_fix_axis(cord_t_c.ra.value, cord_t_c.dec.value)
+            # cord_t_c = get_right_fix_axis(center_ra_colum, center_dec_colum, (img_wid-img_overlap) * j, rtt_r)
+            # cord_t_c = get_right_fix_axis(center_ra_colum, center_dec_colum, (img_wid-img_overlap), rtt_r)
+
+            rtt_l, rtt_r, rtt_t, rtt_b = get_rotate_fix_axis(cord_t_c.ra.value, cord_t_c.dec.value)
+            # rtt_l = np.array([0, 0, 1])
+            # rtt_r = np.array([0, 0, -1])
             # print('[%s]  [%s]              [%s]   [%s]' % (i, j, center_ra_colum, center_dec_colum))
             coordinates = []
             cord_t_c_tm = get_top_fix_axis(cord_t_c.ra.value, cord_t_c.dec.value, (img_hei/2), rtt_t)
@@ -155,6 +165,13 @@ def draw_sun(request):
 
             square_list.append(coordinates)
             center_list.append([cord_t_c.ra.value, cord_t_c.dec.value])
+
+            cord_t_c = get_right_fix_axis(center_ra_colum, center_dec_colum, (img_wid-img_overlap), rtt_r)
+            rtt_l = np.array([0, 0, 1])
+            rtt_r = np.array([0, 0, -1])
+            cord_t_c_dec_by_z = get_right_fix_axis(center_ra_colum, center_dec_colum, (img_wid-img_overlap), rtt_r)
+            center_ra_colum = cord_t_c.ra.value
+            center_dec_colum = cord_t_c_dec_by_z.dec.value
     # =======================================================================================
     # for i in range(num_row):
     #     cord_row_head_center_item = get_top(cen_ra_row, cen_dec_row, (img_hei-img_overlap)*i, current_time, location)
@@ -276,7 +293,7 @@ def draw_sun(request):
                          'moon_ra': str(moon_radec.ra.deg), 'moon_dec': str(moon_radec.dec.deg),
                          'ex_message': ex_message, 'sun_curve': sun_curve, 'moon_curve': moon_curve,
                          'center_ra': str(center_ra.value), 'center_dec': str(center_dec.value),
-                         'areas': square_list})
+                         'areas': square_list, 'centers': center_list})
 
 
 def draw_plan(request):
