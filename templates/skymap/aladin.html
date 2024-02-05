@@ -154,6 +154,63 @@
         </div>
         <!-- /.row -->
         <div class="row">
+            <div class="col-md-2">
+                <div class="input-group-append">
+                    <label class="col-form-label" for="inputWarning"><i class="far fa-flash"></i>RA</label>
+                    <input type="text" class="form-control is-warning" id="x_cen_val" placeholder="RA" value="20.1">
+                </div>
+            </div>
+            <div class="col-md-2">
+                <div class="input-group-append">
+                    <label class="col-form-label" for="inputWarning"><i class="far fa-flash"></i>Dec</label>
+                    <input type="text" class="form-control is-warning" id="y_cen_val" placeholder="Dec" value="20.3">
+                </div>
+            </div>
+            <div class="col-md-2">
+                <div class="input-group-append">
+                  <button id="get-ra-dec-button" class="btn btn-default">
+                    <i class="fas fa-unsorted">获取星图 RA Dec （双击星图定位）</i>
+                  </button>
+                </div>
+            </div>
+        </div>
+        <div class="row">
+            <div class="col-md-2">
+                <div class="input-group-append">
+                    <label class="col-form-label" for="inputWarning"><i class="far fa-flash"></i>行 row</label>
+                    <input type="text" class="form-control is-warning" id="x_row_val" placeholder="行 row" value="3">
+                </div>
+            </div>
+            <div class="col-md-2">
+                <div class="input-group-append">
+                    <label class="col-form-label" for="inputWarning"><i class="far  fa-arrows-v"></i>列 col</label>
+                    <input type="text" class="form-control is-warning" id="y_col_val" placeholder="列 col" value="3">
+                </div>
+            </div>
+            <div class="col-md-2">
+                <div class="input-group-append">
+                    <label class="col-form-label" for="inputWarning"><i class="far  fa-arrows-v"></i>宽</label>
+                    <input type="text" class="form-control is-warning" id="y_img_val" placeholder="宽" value="4.1">
+                </div>
+            </div>
+            <div class="col-md-2">
+                <div class="input-group-append">
+                    <label class="col-form-label" for="inputWarning"><i class="far  fa-arrows-v"></i>高</label>
+                    <input type="text" class="form-control is-warning" id="x_img_val" placeholder="高" value="3.1">
+                </div>
+            </div>
+        </div>
+
+        <div class="row">
+            <div class="col-md-2">
+                <div class="input-group-append">
+                    <label class="col-form-label" for="inputWarning"><i class="far fa-bell"></i>重叠量 overlap （度 deg） </label>
+                    <input type="text" class="form-control is-warning" id="overlap_val" placeholder="重叠量 overlap （度 deg）" value="1.0">
+                </div>
+            </div>
+        </div>
+
+        <div class="row">
             <div class="col-md-12">
                 <div class="input-group-append">
                   <button id="add-marker-button" class="btn btn-default">
@@ -165,7 +222,7 @@
                   </button>
                     <span class="">&nbsp;&nbsp;</span>
                   <button id="draw-curve-button" class="btn btn-default">
-                    <i class="fas fa-check-circle">绘制曲线</i>
+                    <i class="fas fa-check-circle">清除</i>
                   </button>
                 </div>
             </div>
@@ -206,7 +263,14 @@
 <script src="{% static 'dist/js/demo.js' %}"></script>
 <script type="text/javascript" src="{% static 'skymap/aladin.umd.cjs' %}" charset="utf-8"></script>
 <script type="text/javascript">
-    var aladin;
+    let aladin;
+
+    function onClickAladin() {
+        let raDec = aladin.getRaDec();
+        $("#x_cen_val").val(raDec[0]);
+        $("#y_cen_val").val(raDec[1]);
+        console.log("Double clicked at RA: " + raDec[0] + ", Dec: " + raDec[1]);
+    }
     A.init.then(() => {
         aladin = A.aladin('#aladin-lite-div', {fov: 180, projection: "AIT", fullScreen: false,
             expandLayersControl: false, cooFrame: 'equatorial', showProjectionControl: true,
@@ -284,7 +348,7 @@
 
 		});
 
-
+        {#aladin.on('click', onClickAladin);#}
 
     });
     $(document).ready(function() {
@@ -308,7 +372,16 @@
 
        $('#draw-sun-button').on('click', function () {
           let ex_message_ser = '';
-          $.getJSON( "draw_sun", {req_x_deg:$('#table_search_x').val()}
+          {#$.getJSON( "draw_sun", {req_overlap_deg:$("overlap_val").val()}#}
+          let overlap_temp = $("#overlap_val").val();
+          let x_row_temp = $("#x_row_val").val();
+          let y_col_temp = $("#y_col_val").val();
+          let x_img_temp = $("#x_img_val").val();
+          let y_img_temp = $("#y_img_val").val();
+          let x_cen_temp = $("#x_cen_val").val();
+          let y_cen_temp = $("#y_cen_val").val();
+          $.getJSON( "draw_sun", {req_overlap_deg:overlap_temp, req_row_int:x_row_temp, req_col_int:y_col_temp,
+              req_x_img_deg:x_img_temp, req_y_img_deg:y_img_temp,req_ra_deg:x_cen_temp,req_dec_deg:y_cen_temp}
             , function( data ) {
               console.log(data);
 			let marker_sun = A.marker(data.sun_ra, data.sun_dec, {popupTitle: '太阳', popupDesc: '--'});
@@ -363,7 +436,7 @@
 
 
 			let marker_cen = A.marker(data.center_ra, data.center_dec, {popupTitle: 'Cen', popupDesc: data.center_ra+'  '+data.center_dec});
-			let markerLayer_cen = A.catalog({name: 'Center', sourceSize: 10,color: '#a1e583'});
+			let markerLayer_cen = A.catalog({name: 'Center', sourceSize: 10,color: '#cc00ff'});
 
             let centers_data = data.centers;;
             for(let i = 0; i < centers_data.length; i++) {
@@ -372,7 +445,7 @@
             }
 
 			aladin.addCatalog(markerLayer_cen);
-			markerLayer_cen.addSources([marker_cen]);
+			{#markerLayer_cen.addSources([marker_cen]);#}
             console.log(data.center_ra)
             console.log(data.center_dec)
 
@@ -387,6 +460,24 @@
 
 
        });
+
+       $("#overlap_val").on("input", function () {
+          let inputValue = $(this).val();
+          // 使用正则表达式进行校验 小数数字输入
+          let regex = /^[0-9]+(\.[0-9]+)?$/;
+          $(this).removeClass("is-warning");
+          if (regex.test(inputValue)) {
+          $(this).removeClass("is-invalid").addClass("is-valid");
+          console.log("输入合法");
+          } else {
+            $(this).removeClass("is-valid").addClass("is-invalid");
+              console.log("输入不合法");
+          }
+      });
+       $("#get-ra-dec-button").on("click",function (){
+         onClickAladin();
+       })
+
     });
 
 </script>
