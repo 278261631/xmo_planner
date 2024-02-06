@@ -213,12 +213,12 @@
         <div class="row">
             <div class="col-md-12">
                 <div class="input-group-append">
-                  <button id="add-marker-button" class="btn btn-default">
-                    <i class="fas fa-check-circle">添加标记点</i>
-                  </button>
+{#                  <button id="add-marker-button" class="btn btn-default">#}
+{#                    <i class="fas fa-check-circle">添加标记点</i>#}
+{#                  </button>#}
                     <span class="">&nbsp;&nbsp;</span>
                   <button id="draw-sun-button" class="btn btn-default">
-                    <i class="fas fa-check-circle">获取太阳位置</i>
+                    <i class="fas fa-check-circle">生成计划（启动后第一次比较慢）</i>
                   </button>
                     <span class="">&nbsp;&nbsp;</span>
                   <button id="clear-plan-squire-button" class="btn btn-default">
@@ -335,26 +335,26 @@
 		footprintLayer.addFootprints([A.polygon([[10.0, 10.0], [10.0, 20], [20.0, 20], [30.0, 20], [30, 10], [20, 10], [20, 0]])]);
 				
 				
-				// 获取按钮元素
-		let addButton = document.getElementById('add-marker-button');
-
-		
-		addButton.addEventListener('click', function () {
-
-			var markerRa_1 = 15.0;
-			var markerDec_1 = 25.0;
-			var markerRa_2 = 25.0;
-			var markerDec_2 = 30.0;
-
-			let marker_temp_1 = A.marker(markerRa_1, markerDec_1, {popupTitle: 'xxx', popupDesc: '--'});
-			let marker_temp_2 = A.marker(markerRa_2, markerDec_2, {popupTitle: 'xxx', popupDesc: '--'});
-
-			let markerLayer_temp = A.catalog({name: '测试点', sourceSize: 18,color: '#ffff11'});
-			aladin.addCatalog(markerLayer_temp);
-			markerLayer_temp.addSources([marker_temp_1,marker_temp_2]);
-
-
-		});
+		{#		// 获取按钮元素#}
+		{#let addButton = document.getElementById('add-marker-button');#}
+        {##}
+		{##}
+		{#addButton.addEventListener('click', function () {#}
+        {##}
+		{#	var markerRa_1 = 15.0;#}
+		{#	var markerDec_1 = 25.0;#}
+		{#	var markerRa_2 = 25.0;#}
+		{#	var markerDec_2 = 30.0;#}
+        {##}
+		{#	let marker_temp_1 = A.marker(markerRa_1, markerDec_1, {popupTitle: 'xxx', popupDesc: '--'});#}
+		{#	let marker_temp_2 = A.marker(markerRa_2, markerDec_2, {popupTitle: 'xxx', popupDesc: '--'});#}
+        {##}
+		{#	let markerLayer_temp = A.catalog({name: '测试点', sourceSize: 18,color: '#ffff11'});#}
+		{#	aladin.addCatalog(markerLayer_temp);#}
+		{#	markerLayer_temp.addSources([marker_temp_1,marker_temp_2]);#}
+        {##}
+        {##}
+		{#});#}
 
         aladin.on('click', onClickAladin);
 
