@@ -227,6 +227,14 @@
                 </div>
             </div>
         </div>
+        <div class="row">
+            <div class="col-md-4">
+                <div class="input-group-append">
+                    <label class="col-form-label" for="inputWarning">plan 存放目录：</label>
+                    <label id="out-plan-path" class="col-form-label" for="inputWarning">-- </label>
+                </div>
+            </div>
+        </div>
 
 
         </div><!-- /.container-fluid -->
@@ -371,6 +379,7 @@
 
 
        $('#draw-sun-button').on('click', function () {
+          $('#out-plan-path').text('----');
           let ex_message_ser = '';
           {#$.getJSON( "draw_sun", {req_overlap_deg:$("overlap_val").val()}#}
           let overlap_temp = $("#overlap_val").val();
@@ -451,7 +460,7 @@
 
             ex_message_ser = data.ex_message;
             toastr.success('结果数目： ' +data.areas.length);
-
+            $('#out-plan-path').text(data.out_path.replace('\\','/'));
             if(ex_message_ser.length > 0){
               toastr.warning(ex_message_ser);
             }

@@ -416,7 +416,7 @@ def draw_sun(request):
                          'moon_ra': str(moon_radec.ra.deg), 'moon_dec': str(moon_radec.dec.deg),
                          'ex_message': ex_message, 'sun_curve': sun_curve, 'moon_curve': moon_curve,
                          'center_ra': str(center_ra.value), 'center_dec': str(center_dec.value),
-                         'areas': square_list, 'centers': center_list})
+                         'areas': square_list, 'centers': center_list, 'out_path': out_path})
 
 
 def draw_plan(request):
