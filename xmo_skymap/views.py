@@ -191,7 +191,7 @@ def draw_sun(request):
                 cord_t_c_dec_by_z = get_left_fix_axis(pre_center_ra_colum, pre_center_dec_colum,
                                                       ((img_wid - img_overlap) / first_angle), rtt_l)
                 pre_center_ra_colum = cord_t_c_dec_by_z.ra.value
-                pre_center_dec_colum = cord_t_c_dec_by_z.dec.value
+                # pre_center_dec_colum = cord_t_c_dec_by_z.dec.value
                 temp_center_coordinates.append([pre_center_ra_colum, pre_center_dec_colum])
             temp_center_coordinates.reverse()
             pre_center_ra_colum = row_center_ra
@@ -206,7 +206,7 @@ def draw_sun(request):
                 cord_t_c_dec_by_z = get_right_fix_axis(pre_center_ra_colum, pre_center_dec_colum,
                                                        ((img_wid - img_overlap) / first_angle), rtt_r)
                 pre_center_ra_colum = cord_t_c_dec_by_z.ra.value
-                pre_center_dec_colum = cord_t_c_dec_by_z.dec.value
+                # pre_center_dec_colum = cord_t_c_dec_by_z.dec.value
                 temp_center_coordinates.append([pre_center_ra_colum, pre_center_dec_colum])
             center_list.extend(temp_center_coordinates)
         else:
@@ -221,7 +221,7 @@ def draw_sun(request):
                 cord_t_c_dec_by_z = get_left_fix_axis(pre_center_ra_colum, pre_center_dec_colum,
                                                       (img_wid - img_overlap), rtt_l)
                 pre_center_ra_colum = cord_t_c_dec_by_z.ra.value
-                pre_center_dec_colum = cord_t_c_dec_by_z.dec.value
+                # pre_center_dec_colum = cord_t_c_dec_by_z.dec.value
                 temp_center_coordinates.append([pre_center_ra_colum, pre_center_dec_colum])
             temp_center_coordinates.reverse()
             temp_center_coordinates.append([row_center_ra, row_center_dec])
@@ -234,7 +234,7 @@ def draw_sun(request):
                 cord_t_c_dec_by_z = get_right_fix_axis(pre_center_ra_colum, pre_center_dec_colum,
                                                        (img_wid - img_overlap), rtt_r)
                 pre_center_ra_colum = cord_t_c_dec_by_z.ra.value
-                pre_center_dec_colum = cord_t_c_dec_by_z.dec.value
+                # pre_center_dec_colum = cord_t_c_dec_by_z.dec.value
                 temp_center_coordinates.append([pre_center_ra_colum, pre_center_dec_colum])
             center_list.extend(temp_center_coordinates)
 

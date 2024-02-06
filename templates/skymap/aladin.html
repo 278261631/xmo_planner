@@ -166,10 +166,10 @@
                     <input type="text" class="form-control is-warning" id="y_cen_val" placeholder="Dec" value="20.3">
                 </div>
             </div>
-            <div class="col-md-2">
+            <div class="col-md-3">
                 <div class="input-group-append">
                   <button id="get-ra-dec-button" class="btn btn-default">
-                    <i class="fas fa-unsorted">获取星图 RA Dec （双击星图定位）</i>
+                    <i class="fas fa-unsorted">获取星图 RA Dec （拖拽 双击）星图定位）</i>
                   </button>
                 </div>
             </div>
@@ -190,22 +190,22 @@
             <div class="col-md-2">
                 <div class="input-group-append">
                     <label class="col-form-label" for="inputWarning"><i class="far  fa-arrows-v"></i>宽</label>
-                    <input type="text" class="form-control is-warning" id="y_img_val" placeholder="宽" value="4.1">
+                    <input type="text" class="form-control is-warning" id="x_img_val" placeholder="宽" value="3.333333334">
                 </div>
             </div>
             <div class="col-md-2">
                 <div class="input-group-append">
                     <label class="col-form-label" for="inputWarning"><i class="far  fa-arrows-v"></i>高</label>
-                    <input type="text" class="form-control is-warning" id="x_img_val" placeholder="高" value="3.1">
+                    <input type="text" class="form-control is-warning" id="y_img_val" placeholder="高" value="2.216666667">
                 </div>
             </div>
         </div>
 
         <div class="row">
-            <div class="col-md-2">
+            <div class="col-md-4">
                 <div class="input-group-append">
                     <label class="col-form-label" for="inputWarning"><i class="far fa-bell"></i>重叠量 overlap （度 deg） </label>
-                    <input type="text" class="form-control is-warning" id="overlap_val" placeholder="重叠量 overlap （度 deg）" value="1.0">
+                    <input type="text" class="form-control is-warning" id="overlap_val" placeholder="重叠量 overlap （度 deg）" value="0.2">
                 </div>
             </div>
         </div>
@@ -221,7 +221,7 @@
                     <i class="fas fa-check-circle">获取太阳位置</i>
                   </button>
                     <span class="">&nbsp;&nbsp;</span>
-                  <button id="draw-curve-button" class="btn btn-default">
+                  <button id="clear-plan-squire-button" class="btn btn-default">
                     <i class="fas fa-check-circle">清除</i>
                   </button>
                 </div>
@@ -348,7 +348,7 @@
 
 		});
 
-        {#aladin.on('click', onClickAladin);#}
+        aladin.on('click', onClickAladin);
 
     });
     $(document).ready(function() {
@@ -438,7 +438,7 @@
 			let marker_cen = A.marker(data.center_ra, data.center_dec, {popupTitle: 'Cen', popupDesc: data.center_ra+'  '+data.center_dec});
 			let markerLayer_cen = A.catalog({name: 'Center', sourceSize: 10,color: '#cc00ff'});
 
-            let centers_data = data.centers;;
+            let centers_data = data.centers;
             for(let i = 0; i < centers_data.length; i++) {
                 let marker_cen_item = A.marker(centers_data[i][0], centers_data[i][1], {popupTitle: 'Cen', popupDesc: centers_data[i][0]+'  '+centers_data[i][1]});
                 markerLayer_cen.addSources([marker_cen_item]);
@@ -450,7 +450,7 @@
             console.log(data.center_dec)
 
             ex_message_ser = data.ex_message;
-            toastr.success('结果数目： ' +data);
+            toastr.success('结果数目： ' +data.areas.length);
 
             if(ex_message_ser.length > 0){
               toastr.warning(ex_message_ser);
@@ -476,7 +476,13 @@
       });
        $("#get-ra-dec-button").on("click",function (){
          onClickAladin();
-       })
+       });
+       $("#clear-plan-squire-button").on("click",function (){
+         aladin.removeLayers();
+       });
+       $("#aladin-lite-div").on("dblclick",function (){
+         onClickAladin();
+       });
 
     });
 
