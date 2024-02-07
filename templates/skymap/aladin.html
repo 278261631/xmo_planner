@@ -325,11 +325,14 @@
     function calc_row_col(temp_image_w, temp_image_h){
         {#let temp_image_w = 2.2166666667;#}
         {#let temp_image_h = 3.3333333334;#}
-        let generate_num_north = Math.floor(90 / temp_image_h);
-        let generate_num_south = Math.floor(10 / temp_image_h);
+        let start_deg = -10.0;
+        let end_deg = 90.0;
+        let dec_wid = end_deg - start_deg;
+        let generate_num_north = Math.floor(dec_wid / temp_image_h) + 1;
+        {#let generate_num_south = Math.floor(10 / temp_image_h);#}
         {#let temp_image_w_rad = temp_image_w * Math.PI / 180;#}
 
-        {#generate_num_north = 12;#}
+        {#generate_num_north = 5;#}
         for (let i=0;i<generate_num_north;i++){
             let temp_overlap_min = temp_image_w / 200;
             let temp_overlap_max = temp_image_w / 20;
@@ -337,7 +340,7 @@
             let temp_overlap_angle_level_rad =  temp_overlap_angle_level_deg * Math.PI / 180;
             let temp_overlap_using = temp_overlap_min + (temp_overlap_max-temp_overlap_min)*Math.sin(temp_overlap_angle_level_rad) ;
             {#let temp_overlap_using = sin(dec) + temp_overlap_min;#}
-            let temp_center_dec = (temp_image_h - temp_overlap_using) * i;
+            let temp_center_dec = start_deg + (temp_image_h - temp_overlap_using) * i;
             let temp_center_dec_rad = temp_center_dec * Math.PI / 180;
             let temp_row_count = 1;
             let temp_col_count = 1;
