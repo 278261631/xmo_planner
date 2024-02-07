@@ -157,13 +157,13 @@
             <div class="col-md-2">
                 <div class="input-group-append">
                     <label class="col-form-label" for="inputWarning"><i class="far fa-flash"></i>RA</label>
-                    <input type="text" class="form-control is-warning" id="x_cen_val" placeholder="RA" value="20.1">
+                    <input type="text" class="form-control is-warning" id="x_cen_val" placeholder="RA" value="0">
                 </div>
             </div>
             <div class="col-md-2">
                 <div class="input-group-append">
                     <label class="col-form-label" for="inputWarning"><i class="far fa-flash"></i>Dec</label>
-                    <input type="text" class="form-control is-warning" id="y_cen_val" placeholder="Dec" value="20.3">
+                    <input type="text" class="form-control is-warning" id="y_cen_val" placeholder="Dec" value="0">
                 </div>
             </div>
             <div class="col-md-3">
@@ -198,6 +198,50 @@
                     <label class="col-form-label" for="inputWarning"><i class="far  fa-arrows-v"></i>高</label>
                     <input type="text" class="form-control is-warning" id="y_img_val" placeholder="高" value="2.216666667">
                 </div>
+            </div>
+        </div>
+        <div class="row">
+            <div class="col-md-2">
+                  <button id="switch-to-kats-button" class="btn btn-default">
+                    <i class="fas fa-check-circle">KATS</i>
+                  </button>
+            </div>
+            <div class="col-md-2">
+                  <button id="switch-to-east-button" class="btn btn-default">
+                    <i class="fas fa-check-circle">EAST</i>
+                  </button>
+            </div>
+            <div class="col-md-2">
+                  <button id="switch-to-pat-button" class="btn btn-default">
+                    <i class="fas fa-check-circle">PAT</i>
+                  </button>
+            </div>
+            <div class="col-md-2">
+                  <button id="switch-to-gy7-button" class="btn btn-default">
+                    <i class="fas fa-check-circle">GY7</i>
+                  </button>
+            </div>
+        </div>
+        <div class="row">
+            <div class="col-md-2">
+                  <button id="load-from-kats-button" class="btn btn-default">
+                    <i class="fas fa-check-circle">加载 KATS</i>
+                  </button>
+            </div>
+            <div class="col-md-2">
+                  <button id="load-from-east-button" class="btn btn-default">
+                    <i class="fas fa-check-circle">加载 EAST</i>
+                  </button>
+            </div>
+            <div class="col-md-2">
+                  <button id="load-from-pat-button" class="btn btn-default">
+                    <i class="fas fa-check-circle">加载 PAT</i>
+                  </button>
+            </div>
+            <div class="col-md-2">
+                  <button id="load-from-gy7-button" class="btn btn-default">
+                    <i class="fas fa-check-circle">加载 GY7</i>
+                  </button>
             </div>
         </div>
 
@@ -272,12 +316,60 @@
 <script type="text/javascript" src="{% static 'skymap/aladin.umd.cjs' %}" charset="utf-8"></script>
 <script type="text/javascript">
     let aladin;
+    const dic_sys_name_params = {
+        "kats": {"name":"KATS","img_w":"3.33333334","img_h":"2.216666667"},
+        "east": {"name":"EAST","img_w":"7.35","img_h":"5.51666667"},
+        "pat" : {"name":"PAT" ,"img_w":"1.95","img_h":"1.95"},
+        "gy7" : {"name":"GY7" ,"img_w":"3.33333334","img_h":"2.216666667"},
+    };
+    function calc_row_col(temp_image_w, temp_image_h){
+        {#let temp_image_w = 2.2166666667;#}
+        {#let temp_image_h = 3.3333333334;#}
+        let generate_num_north = Math.floor(90 / temp_image_h);
+        let generate_num_south = Math.floor(10 / temp_image_h);
+        {#let temp_image_w_rad = temp_image_w * Math.PI / 180;#}
 
+        {#generate_num_north = 12;#}
+        for (let i=0;i<generate_num_north;i++){
+            let temp_overlap_min = temp_image_w / 200;
+            let temp_overlap_max = temp_image_w / 20;
+            let temp_overlap_angle_level_deg =  temp_image_h * i;
+            let temp_overlap_angle_level_rad =  temp_overlap_angle_level_deg * Math.PI / 180;
+            let temp_overlap_using = temp_overlap_min + (temp_overlap_max-temp_overlap_min)*Math.sin(temp_overlap_angle_level_rad) ;
+            {#let temp_overlap_using = sin(dec) + temp_overlap_min;#}
+            let temp_center_dec = (temp_image_h - temp_overlap_using) * i;
+            let temp_center_dec_rad = temp_center_dec * Math.PI / 180;
+            let temp_row_count = 1;
+            let temp_col_count = 1;
+            {#temp_col_count = Math.floor(360 / temp_image_w);#}
+            let temp_image_w_alpa = temp_image_w * (1 / Math.cos(temp_center_dec_rad))
+            console.log("cos" +  Math.cos(temp_center_dec_rad)  + "   1 cos" + (1 / Math.cos(temp_center_dec_rad)));
+            console.log("alpa" + temp_center_dec_rad);
+            temp_col_count = Math.ceil(360 / (temp_image_w_alpa - temp_overlap_using));
+            {#temp_col_count = Math.ceil(360 / (temp_image_w - temp_overlap_using));#}
+            if(temp_overlap_angle_level_deg > 50 ){
+                //高度越高 大圆弧度对应小圆弧度的折损 越多
+                temp_col_count = temp_col_count + 1;
+            }
+            $("#x_img_val").val(temp_image_w);
+            $("#y_img_val").val(temp_image_h);
+            $("#overlap_val").val(temp_overlap_using);
+            $("#x_row_val").val(temp_row_count);
+            $("#y_col_val").val(temp_col_count);
+            $("#x_cen_val").val(0);
+            $("#y_cen_val").val(temp_center_dec);
+            console.log("i=%{"+i+"}  count["+generate_num_north+"]  弧长对应夹角["+temp_image_w_alpa+"]  dec ["+temp_center_dec+"]");
+            console.log("rad=%{"+temp_center_dec_rad+"} 列数["+temp_col_count+"]   行数["+generate_num_north+"] 重叠【"+temp_overlap_using+"]" );
+            $("#draw-sun-button").click();
+
+        }
+
+    }
     function onClickAladin() {
         let raDec = aladin.getRaDec();
         $("#x_cen_val").val(raDec[0]);
         $("#y_cen_val").val(raDec[1]);
-        console.log("Double clicked at RA: " + raDec[0] + ", Dec: " + raDec[1]);
+        {#console.log("Double clicked at RA: " + raDec[0] + ", Dec: " + raDec[1]);#}
     }
     A.init.then(() => {
         aladin = A.aladin('#aladin-lite-div', {fov: 180, projection: "AIT", fullScreen: false,
@@ -427,7 +519,7 @@
             let overlay_areas = A.graphicOverlay({name: 'areas', color: '#8ebd84', lineWidth: 2});
             aladin.addOverlay(overlay_areas);
             for(let i = 0; i < plan_area.length; i++){
-                console.log(plan_area[i]);
+                {#console.log(plan_area[i]);#}
                 {#let overlay_areas = A.graphicOverlay({name: 'a_'+i, color: '#8ebd84', lineWidth: 2});#}
                 {#aladin.addOverlay(overlay_areas);#}
                 overlay_areas.addFootprints([A.polygon(plan_area[i])]);
@@ -444,16 +536,16 @@
             }
 
 
-			let marker_cen = A.marker(data.center_ra, data.center_dec, {popupTitle: 'Cen', popupDesc: data.center_ra+'  '+data.center_dec});
-			let markerLayer_cen = A.catalog({name: 'Center', sourceSize: 10,color: '#cc00ff'});
+			{#let marker_cen = A.marker(data.center_ra, data.center_dec, {popupTitle: 'Cen', popupDesc: data.center_ra+'  '+data.center_dec});#}
+			{#let markerLayer_cen = A.catalog({name: 'Center', sourceSize: 10,color: '#cc00ff'});#}
+            {##}
+            {#let centers_data = data.centers;#}
+            //for(let i = 0; i < centers_data.length; i++) {
+                {#let marker_cen_item = A.marker(centers_data[i][0], centers_data[i][1], {popupTitle: 'Cen', popupDesc: centers_data[i][0]+'  '+centers_data[i][1]});#}
+                {#markerLayer_cen.addSources([marker_cen_item]);#}
+            //}
 
-            let centers_data = data.centers;
-            for(let i = 0; i < centers_data.length; i++) {
-                let marker_cen_item = A.marker(centers_data[i][0], centers_data[i][1], {popupTitle: 'Cen', popupDesc: centers_data[i][0]+'  '+centers_data[i][1]});
-                markerLayer_cen.addSources([marker_cen_item]);
-            }
-
-			aladin.addCatalog(markerLayer_cen);
+			{#aladin.addCatalog(markerLayer_cen);#}
 			{#markerLayer_cen.addSources([marker_cen]);#}
             console.log(data.center_ra)
             console.log(data.center_dec)
@@ -491,6 +583,18 @@
        });
        $("#aladin-lite-div").on("dblclick",function (){
          onClickAladin();
+       });
+       $("#switch-to-kats-button").on("click",function (){
+            calc_row_col(dic_sys_name_params["kats"]["img_w"], dic_sys_name_params["kats"]["img_h"]);
+       });
+       $("#switch-to-east-button").on("click",function (){
+            calc_row_col(dic_sys_name_params["east"]["img_w"], dic_sys_name_params["east"]["img_h"]);
+       });
+       $("#switch-to-pat-button").on("click",function (){
+            calc_row_col(dic_sys_name_params["pat"]["img_w"], dic_sys_name_params["pat"]["img_h"]);
+       });
+       $("#switch-to-gy7-button").on("click",function (){
+            calc_row_col(dic_sys_name_params["gy7"]["img_w"], dic_sys_name_params["gy7"]["img_h"]);
        });
 
     });

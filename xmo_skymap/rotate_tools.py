@@ -108,10 +108,10 @@ def get_l_r_t_b_axis_by_az(point_star_x):
     top_r_axis = rotate(left_r_axis, np.pi / 2, point_star_x)
     # bottom_axis = rotate(left_axis, np.pi/2, point_star_x)
     bottom_r_axis = np.negative(top_r_axis)
-    print('l:%s  (%s,%s,%s)' % (left_r_axis, left_r_axis[0], left_r_axis[1], left_r_axis[2]))
-    print('r:%s  (%s,%s,%s)' % (right_r_axis, right_r_axis[0], right_r_axis[1], right_r_axis[2]))
-    print('t:%s  (%s,%s,%s)' % (top_r_axis, top_r_axis[0], top_r_axis[1], top_r_axis[2]))
-    print('b:%s  (%s,%s,%s)' % (bottom_r_axis, bottom_r_axis[0], bottom_r_axis[1], bottom_r_axis[2]))
+    # print('l:%s  (%s,%s,%s)' % (left_r_axis, left_r_axis[0], left_r_axis[1], left_r_axis[2]))
+    # print('r:%s  (%s,%s,%s)' % (right_r_axis, right_r_axis[0], right_r_axis[1], right_r_axis[2]))
+    # print('t:%s  (%s,%s,%s)' % (top_r_axis, top_r_axis[0], top_r_axis[1], top_r_axis[2]))
+    # print('b:%s  (%s,%s,%s)' % (bottom_r_axis, bottom_r_axis[0], bottom_r_axis[1], bottom_r_axis[2]))
     return left_r_axis, right_r_axis, top_r_axis, bottom_r_axis
 
 

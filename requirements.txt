@@ -1,0 +1,6 @@
+Django
+matplotlib
+numpy
+pytz
+astropy
+django-cors-headers
