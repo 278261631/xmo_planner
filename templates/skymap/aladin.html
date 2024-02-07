@@ -270,6 +270,10 @@
                     <i class="fas fa-check-circle">生成计划（启动后第一次比较慢）</i>
                   </button>
                     <span class="">&nbsp;&nbsp;</span>
+                  <button id="draw-jgg-button" class="btn btn-default">
+                    <i class="fas fa-check-circle">九宫格（启动后第一次比较慢）</i>
+                  </button>
+                    <span class="">&nbsp;&nbsp;</span>
                   <button id="clear-plan-squire-button" class="btn btn-default">
                     <i class="fas fa-check-circle">清除</i>
                   </button>
@@ -531,6 +535,70 @@
 			let markerLayer_moon_curve = A.catalog({name: '-', sourceSize: 8,color: '#AAAAAA'});
 			aladin.addCatalog(markerLayer_moon_curve);
 			markerLayer_moon_curve.addSources(markers_moon);
+
+            let plan_area = data.areas;
+            let overlay_areas = A.graphicOverlay({name: 'areas', color: '#8ebd84', lineWidth: 1});
+            aladin.addOverlay(overlay_areas);
+            for(let i = 0; i < plan_area.length; i++){
+                {#console.log(plan_area[i]);#}
+                {#let overlay_areas = A.graphicOverlay({name: 'a_'+i, color: '#8ebd84', lineWidth: 2});#}
+                {#aladin.addOverlay(overlay_areas);#}
+                overlay_areas.addFootprints([A.polygon(plan_area[i])]);
+
+                {#for(let j=0; j<plan_area[i].length; j++ ){#}
+                {#    let marker_cor = A.marker(plan_area[i][j][0], plan_area[i][j][1], {popupTitle: 'Cen', popupDesc: plan_area[i][j][0]+'  '+plan_area[i][j][1]});#}
+                {#    let markerLayer_cor = A.catalog({name: 'Center', sourceSize: 14,color: '#a606f8'});#}
+                {#    aladin.addCatalog(markerLayer_cor);#}
+                {#    markerLayer_cor.addSources([marker_cor]);#}
+                {#    console.log(plan_area[i][j][0])#}
+                {#    console.log(plan_area[i][j][1])#}
+                {##}
+                {# }#}
+            }
+
+
+			{#let marker_cen = A.marker(data.center_ra, data.center_dec, {popupTitle: 'Cen', popupDesc: data.center_ra+'  '+data.center_dec});#}
+			{#let markerLayer_cen = A.catalog({name: 'Center', sourceSize: 10,color: '#cc00ff'});#}
+            {##}
+            {#let centers_data = data.centers;#}
+            //for(let i = 0; i < centers_data.length; i++) {
+                {#let marker_cen_item = A.marker(centers_data[i][0], centers_data[i][1], {popupTitle: 'Cen', popupDesc: centers_data[i][0]+'  '+centers_data[i][1]});#}
+                {#markerLayer_cen.addSources([marker_cen_item]);#}
+            //}
+
+			{#aladin.addCatalog(markerLayer_cen);#}
+			{#markerLayer_cen.addSources([marker_cen]);#}
+            console.log(data.center_ra)
+            console.log(data.center_dec)
+
+            ex_message_ser = data.ex_message;
+            toastr.success('结果数目： ' +data.areas.length);
+            $('#out-plan-path').text(data.out_path.replace('\\','/'));
+            if(ex_message_ser.length > 0){
+              toastr.warning(ex_message_ser);
+            }
+
+          }).fail(function() { toastr.error('服务器错误'); })
+
+
+       });
+
+       $('#draw-jgg-button').on('click', function () {
+          $('#out-plan-path').text('----');
+          let ex_message_ser = '';
+          let overlap_temp = $("#overlap_val").val();
+          let x_row_temp = $("#x_row_val").val();
+          let y_col_temp = $("#y_col_val").val();
+          let x_img_temp = $("#x_img_val").val();
+          let y_img_temp = $("#y_img_val").val();
+          let x_cen_temp = $("#x_cen_val").val();
+          let y_cen_temp = $("#y_cen_val").val();
+          console.log("sys_name: " + current_sys_name)
+          $.getJSON( "draw_all_sky_by_jgg", {req_overlap_deg:overlap_temp, req_row_int:x_row_temp, req_col_int:y_col_temp,
+              req_x_img_deg:x_img_temp, req_y_img_deg:y_img_temp,req_ra_deg:x_cen_temp,req_dec_deg:y_cen_temp,
+              req_sys_name:current_sys_name,
+              }, function( data ) {
+              console.log(data);
 
             let plan_area = data.areas;
             let overlay_areas = A.graphicOverlay({name: 'areas', color: '#8ebd84', lineWidth: 1});
