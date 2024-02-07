@@ -1,3 +1,7 @@
-replace_ra_deg xxaa
+;begin
+#DIR Pxxxxxx
+Pxxx	replace_ra_deg	replace_dec_deg
+;end
 
-replace_dec_deg 大概这样：
+
+

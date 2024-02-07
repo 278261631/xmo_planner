@@ -53,6 +53,7 @@ def draw_sun(request):
     req_y_img = float(request.GET.get('req_y_img_deg', 4.2))
     req_ra_cen_deg = float(request.GET.get('req_ra_deg', 30.1))
     req_dec_cen_deg = float(request.GET.get('req_dec_deg', 40.3))
+    req_sys_name = request.GET.get('req_sys_name', "xmo_auto_")
     ex_message = ''
 
     # 设置观测地点（以纽约为例）
@@ -400,7 +401,7 @@ def draw_sun(request):
     output_root_path = "e:/test"
     now = datetime.now()
     time_str = current_time_with_tz.strftime('%Y%m%d_%H%M%S_%Z')
-    out_path = os.path.join(output_root_path, "%s_%s.txt" % ("auto", time_str))
+    out_path = os.path.join(output_root_path, "%s_%s.txt" % (req_sys_name, time_str))
     # out_path = os.path.join(output_root_path, time_str, "%s_%s.txt" % ("auto", time_str))
 
     temp_item_file_name = "temp_item.txt"

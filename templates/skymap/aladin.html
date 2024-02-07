@@ -204,22 +204,22 @@
         </div>
         <div class="row">
             <div class="col-md-2">
-                  <button id="switch-to-kats-button" class="btn btn-default">
+                  <button id="switch-to-kats-button" class="btn btn-default" data-sysname="kats">
                     <i class="fas fa-check-circle">KATS</i>
                   </button>
             </div>
             <div class="col-md-2">
-                  <button id="switch-to-east-button" class="btn btn-default">
+                  <button id="switch-to-east-button" class="btn btn-default" data-sysname="east">
                     <i class="fas fa-check-circle">EAST</i>
                   </button>
             </div>
             <div class="col-md-2">
-                  <button id="switch-to-pat-button" class="btn btn-default">
+                  <button id="switch-to-pat-button" class="btn btn-default" data-sysname="pat">
                     <i class="fas fa-check-circle">PAT</i>
                   </button>
             </div>
             <div class="col-md-2">
-                  <button id="switch-to-gy7-button" class="btn btn-default">
+                  <button id="switch-to-gy7-button" class="btn btn-default" data-sysname="gy7">
                     <i class="fas fa-check-circle">GY7</i>
                   </button>
             </div>
@@ -322,6 +322,7 @@
 <script type="text/javascript" src="{% static 'skymap/aladin.umd.cjs' %}" charset="utf-8"></script>
 <script type="text/javascript">
     let aladin;
+    let current_sys_name = 'xmo';
     const dic_sys_name_params = {
         "kats": {"name":"KATS","img_w":"3.33333334","img_h":"2.216666667"},
         "east": {"name":"EAST","img_w":"7.35","img_h":"5.51666667"},
@@ -331,8 +332,9 @@
     function calc_row_col(temp_image_w, temp_image_h){
         {#let temp_image_w = 2.2166666667;#}
         {#let temp_image_h = 3.3333333334;#}
-        let start_deg = -10.0;
-        let end_deg = 90.0;
+        {#let start_deg = -10.0;#}
+        let start_deg = 0.0;
+        let end_deg = 80.0;
         let dec_wid = end_deg - start_deg;
         let generate_num_north = Math.floor(dec_wid / temp_image_h) + 1;
         {#let generate_num_south = Math.floor(10 / temp_image_h);#}
@@ -493,8 +495,11 @@
           let y_img_temp = $("#y_img_val").val();
           let x_cen_temp = $("#x_cen_val").val();
           let y_cen_temp = $("#y_cen_val").val();
+          console.log("sys_name: " + current_sys_name)
           $.getJSON( "draw_sun", {req_overlap_deg:overlap_temp, req_row_int:x_row_temp, req_col_int:y_col_temp,
-              req_x_img_deg:x_img_temp, req_y_img_deg:y_img_temp,req_ra_deg:x_cen_temp,req_dec_deg:y_cen_temp}
+              req_x_img_deg:x_img_temp, req_y_img_deg:y_img_temp,req_ra_deg:x_cen_temp,req_dec_deg:y_cen_temp,
+              req_sys_name:current_sys_name,
+              }
             , function( data ) {
               console.log(data);
 			let marker_sun = A.marker(data.sun_ra, data.sun_dec, {popupTitle: '太阳', popupDesc: '--'});
@@ -528,7 +533,7 @@
 			markerLayer_moon_curve.addSources(markers_moon);
 
             let plan_area = data.areas;
-            let overlay_areas = A.graphicOverlay({name: 'areas', color: '#8ebd84', lineWidth: 2});
+            let overlay_areas = A.graphicOverlay({name: 'areas', color: '#8ebd84', lineWidth: 1});
             aladin.addOverlay(overlay_areas);
             for(let i = 0; i < plan_area.length; i++){
                 {#console.log(plan_area[i]);#}
@@ -597,15 +602,19 @@
          onClickAladin();
        });
        $("#switch-to-kats-button").on("click",function (){
+            current_sys_name = $('#switch-to-kats-button').data('sysname');
             calc_row_col(dic_sys_name_params["kats"]["img_w"], dic_sys_name_params["kats"]["img_h"]);
        });
        $("#switch-to-east-button").on("click",function (){
+            current_sys_name = $('#switch-to-east-button').data('sysname');
             calc_row_col(dic_sys_name_params["east"]["img_w"], dic_sys_name_params["east"]["img_h"]);
        });
        $("#switch-to-pat-button").on("click",function (){
+            current_sys_name = $('#switch-to-pat-button').data('sysname');
             calc_row_col(dic_sys_name_params["pat"]["img_w"], dic_sys_name_params["pat"]["img_h"]);
        });
        $("#switch-to-gy7-button").on("click",function (){
+            current_sys_name = $('#switch-to-gy7-button').data('sysname');
             calc_row_col(dic_sys_name_params["gy7"]["img_w"], dic_sys_name_params["gy7"]["img_h"]);
        });
        $("#load-from-kats-button").on("click",function (){
