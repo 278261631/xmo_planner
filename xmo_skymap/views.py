@@ -419,6 +419,128 @@ def draw_sun(request):
                          'areas': square_list, 'centers': center_list, 'out_path': out_path})
 
 
+def draw_load_plan(request):
+    now_date = datetime.today().strftime('%Y%m%d')
+    req_overlap = float(request.GET.get('req_overlap_deg', 0.2))
+    req_row = int(request.GET.get('req_row_int', 2))
+    req_col = int(request.GET.get('req_col_int', 2))
+    req_x_img = float(request.GET.get('req_x_img_deg', 2.1))
+    req_y_img = float(request.GET.get('req_y_img_deg', 4.2))
+    req_ra_cen_deg = float(request.GET.get('req_ra_deg', 30.1))
+    req_dec_cen_deg = float(request.GET.get('req_dec_deg', 40.3))
+    ex_message = ''
+
+    # 起始中心坐标（示例坐标，你可以根据实际需要修改）
+    center_ra = req_ra_cen_deg * u.deg
+    center_dec = req_dec_cen_deg * u.deg
+
+    square_list = []
+    center_list = []
+    kats_region_file = "E:/test/SkyRegion.txt"
+    east_region_file = "E:/test/SkyRegion_EAST.txt"
+    # 打开文件
+    with open(east_region_file, 'r') as file:
+        # 初始化RA和DEC列表
+        ra_list = []
+        dec_list = []
+        row_limit = 1000
+        row_now = 0
+        # 逐行读取文件内容
+        for line in file:
+            # 忽略以分号或井号开头的行
+            if line.startswith(';') or line.startswith('#') or (not line.startswith('P')):
+                continue
+
+            # 提取RA和DEC
+            try:
+                parts = line.split()
+                ra = parts[1]
+                dec = parts[2]
+                # 将RA和DEC添加到列表中
+                ra_list.append(ra)
+                dec_list.append(dec)
+                ra_deg = float(ra) * 15
+                center_list.append([ra_deg, dec])
+                row_now = row_now + 1
+                if row_now > row_limit:
+                    break
+                if row_now % 100 == 0:
+                    print("---[%s /%s]" % (row_now, row_limit))
+            except Exception as e:
+                print(e)
+
+    # # 打印提取的RA和DEC
+    # for ra, dec in zip(ra_list, dec_list):
+    #     print("RA:", ra, "DEC:", dec)
+
+    num_row = req_row
+    num_colum = req_col
+    img_wid = req_x_img
+    img_hei = req_y_img
+    img_overlap = req_overlap
+    row_head_coord_list = []
+    cen_ra_row = center_ra
+    cen_dec_row = center_dec
+    coord_debug = SkyCoord(ra=center_ra, dec=center_dec, unit='deg')
+
+    # =======================================================================================
+    rtt_l, rtt_r, rtt_t, rtt_b = get_rotate_fix_axis(cen_ra_row, cen_dec_row)
+    rtt_l = np.array([0, 0, 1])
+    rtt_r = np.array([0, 0, -1])
+    # rtt_t = np.array([1, 0, 0])
+    # rtt_b = np.array([-1, 0, 0])
+    if num_row % 2 == 0:
+        half_row = num_row // 2
+        for i in range(half_row):
+            cord_row_head_center_item = get_top_fix_axis(cen_ra_row, cen_dec_row, ((img_hei - img_overlap) * i)
+                                                         + ((img_hei / 2) - (img_overlap / 2)), rtt_t)
+            row_head_coord_list.append(cord_row_head_center_item)
+        # reverse top list
+        row_head_coord_list.reverse()
+        for i in range(half_row):
+            cord_row_head_center_item = get_bottom_fix_axis(cen_ra_row, cen_dec_row, ((img_hei - img_overlap) * i)
+                                                            + ((img_hei / 2) - (img_overlap / 2)), rtt_b)
+            row_head_coord_list.append(cord_row_head_center_item)
+    else:
+        half_row = num_row // 2
+        for i in range(half_row):
+            cord_row_head_center_item = get_top_fix_axis(cen_ra_row, cen_dec_row, (img_hei - img_overlap) * (i + 1),
+                                                         rtt_t)
+            row_head_coord_list.append(cord_row_head_center_item)
+        # reverse top list
+        row_head_coord_list.reverse()
+        row_head_coord_list.append(SkyCoord(ra=cen_ra_row, dec=cen_dec_row, unit='deg').transform_to('gcrs'))
+        for i in range(half_row):
+            cord_row_head_center_item = get_bottom_fix_axis(cen_ra_row, cen_dec_row, (img_hei - img_overlap) * (i + 1),
+                                                            rtt_b)
+            row_head_coord_list.append(cord_row_head_center_item)
+
+    # 计算四角点
+    for i in range(len(center_list)):
+        cord_real_center = center_list[i]
+        rtt_l, rtt_r, rtt_t, rtt_b = get_rotate_fix_axis(cord_real_center[0], cord_real_center[1])
+        # rtt_l = np.array([0, 0, 1])
+        # rtt_r = np.array([0, 0, -1])
+        # print('[%s]  [%s]              [%s]   [%s]' % (i, j, center_ra_colum, center_dec_colum))
+        coordinates = []
+        cord_t_c_tm = get_top_fix_axis(cord_real_center[0], cord_real_center[1], (img_hei / 2), rtt_t)
+        cord_t_c_bm = get_bottom_fix_axis(cord_real_center[0], cord_real_center[1], (img_hei / 2), rtt_b)
+        cord_t_c_tl = get_left_fix_axis(cord_t_c_tm.ra.value, cord_t_c_tm.dec.value, (img_wid / 2), rtt_l)
+        cord_t_c_tr = get_right_fix_axis(cord_t_c_tm.ra.value, cord_t_c_tm.dec.value, (img_wid / 2), rtt_r)
+        cord_t_c_bl = get_left_fix_axis(cord_t_c_bm.ra.value, cord_t_c_bm.dec.value, (img_wid / 2), rtt_l)
+        cord_t_c_br = get_right_fix_axis(cord_t_c_bm.ra.value, cord_t_c_bm.dec.value, (img_wid / 2), rtt_r)
+        coordinates.append([cord_t_c_tl.ra.value, cord_t_c_tl.dec.value])
+        coordinates.append([cord_t_c_tr.ra.value, cord_t_c_tr.dec.value])
+        coordinates.append([cord_t_c_br.ra.value, cord_t_c_br.dec.value])
+        coordinates.append([cord_t_c_bl.ra.value, cord_t_c_bl.dec.value])
+
+        square_list.append(coordinates)
+
+    return JsonResponse({'ex_message': ex_message,
+                         'center_ra': str(center_ra.value), 'center_dec': str(center_dec.value),
+                         'areas': square_list, 'centers': center_list})
+
+
 def draw_plan(request):
     plt.style.use(astropy_mpl_style)
     quantity_support()

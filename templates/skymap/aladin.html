@@ -13,6 +13,8 @@
   <link rel="stylesheet" href="{% static 'plugins/datatables-bs4/css/dataTables.bootstrap4.min.css' %}">
   <link rel="stylesheet" href="{% static 'plugins/datatables-responsive/css/responsive.bootstrap4.min.css' %}">
   <link rel="stylesheet" href="{% static 'plugins/datatables-buttons/css/buttons.bootstrap4.min.css' %}">
+  <link rel="stylesheet" href="{% static 'plugins/datatables-buttons/css/buttons.bootstrap4.min.css' %}">
+      <link rel="stylesheet" href="../../plugins/icheck-bootstrap/icheck-bootstrap.min.css">
   <link rel="stylesheet" href="{% static 'plugins/tempusdominus-bootstrap-4/css/tempusdominus-bootstrap-4.min.css' %}">
   <link rel="stylesheet" href="{% static 'plugins/fontawesome-free/css/all.min.css' %}">
   <link rel="stylesheet" href="{% static 'plugins/toastr/toastr.min.css' %}">
@@ -221,6 +223,9 @@
                     <i class="fas fa-check-circle">GY7</i>
                   </button>
             </div>
+            <div class="col-md-2">
+                <input type="checkbox" id="do-generate" data-bootstrap-switch>
+            </div>
         </div>
         <div class="row">
             <div class="col-md-2">
@@ -302,6 +307,7 @@
 <script src="{% static 'plugins/jquery-validation/additional-methods.min.js' %}"></script>
 <!-- Bootstrap 4 -->
 <script src="{% static 'plugins/bootstrap/js/bootstrap.bundle.min.js' %}"></script>
+<script src="{% static 'plugins/bootstrap/js/bootstrap-switch.min.js' %}"></script>
 <script src="{% static 'plugins/datatables/jquery.dataTables.min.js' %}"></script>
 <script src="{% static 'plugins/datatables-bs4/js/dataTables.bootstrap4.min.js' %}"></script>
 
@@ -363,7 +369,10 @@
             $("#y_cen_val").val(temp_center_dec);
             console.log("i=%{"+i+"}  count["+generate_num_north+"]  弧长对应夹角["+temp_image_w_alpa+"]  dec ["+temp_center_dec+"]");
             console.log("rad=%{"+temp_center_dec_rad+"} 列数["+temp_col_count+"]   行数["+generate_num_north+"] 重叠【"+temp_overlap_using+"]" );
-            $("#draw-sun-button").click();
+            if($('#do-generate').is(":checked"))
+            {
+                $("#draw-sun-button").click();
+            }
 
         }
 
@@ -599,7 +608,32 @@
        $("#switch-to-gy7-button").on("click",function (){
             calc_row_col(dic_sys_name_params["gy7"]["img_w"], dic_sys_name_params["gy7"]["img_h"]);
        });
+       $("#load-from-kats-button").on("click",function (){
+          let overlap_temp = $("#overlap_val").val();
+          let x_row_temp = $("#x_row_val").val();
+          let y_col_temp = $("#y_col_val").val();
+          let x_img_temp = $("#x_img_val").val();
+          let y_img_temp = $("#y_img_val").val();
+          let x_cen_temp = $("#x_cen_val").val();
+          let y_cen_temp = $("#y_cen_val").val();
+           $.getJSON( "draw_load_plan", {req_overlap_deg:overlap_temp, req_row_int:x_row_temp, req_col_int:y_col_temp,
+              req_x_img_deg:x_img_temp, req_y_img_deg:y_img_temp,req_ra_deg:x_cen_temp,req_dec_deg:y_cen_temp}
+               , function( data ) {
 
+            let plan_area = data.areas;
+            let overlay_areas = A.graphicOverlay({name: 'areas', color: '#00a0f8', lineWidth: 1});
+            aladin.addOverlay(overlay_areas);
+            console.log("len:  " + plan_area.length)
+            for(let i = 0; i < plan_area.length; i++){
+                overlay_areas.addFootprints([A.polygon(plan_area[i])]);
+            }
+
+          }).fail(function() { toastr.error('服务器错误'); });
+       });
+
+        $("input[data-bootstrap-switch]").each(function(){
+          $(this).bootstrapSwitch('state', $(this).prop('checked'));
+        })
     });
 
 </script>
