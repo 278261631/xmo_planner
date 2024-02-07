@@ -6,9 +6,10 @@ def write_plan_file(template_file, ra_dec_list, dest_file, item_template):
     try:
         item_list_content = ''
         for item in ra_dec_list:
-            item_template = re.sub(r"replace_ra_deg", str(item[0]), item_template)
-            item_template = re.sub(r"replace_dec_deg", str(item[1]), item_template)
-            item_list_content = item_list_content + item_template + os.linesep
+            new_line = item_template
+            new_line = re.sub(r"replace_ra_deg", str(item[0]), new_line)
+            new_line = re.sub(r"replace_dec_deg", str(item[1]), new_line)
+            item_list_content = item_list_content + new_line + os.linesep
 
         with open(template_file, "r", encoding='utf-8') as f:
             content = f.read()
