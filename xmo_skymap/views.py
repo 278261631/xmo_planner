@@ -21,6 +21,9 @@ from xmo_skymap.rotate_tools import get_l_r_t_b_axis, rotate, get_top, get_left,
 matplotlib.use('TkAgg')
 from matplotlib import pyplot as plt
 
+all_sky_center_list = []
+img_wid_hei_list = [1.0, 1.0]
+
 
 def index(request):
     # return HttpResponse("skymap")
@@ -413,6 +416,10 @@ def draw_sun(request):
     template_item_content = load_item_template(temp_item_file_path)
     write_plan_file(temp_list_file_path, center_list, out_path, template_item_content)
 
+    all_sky_center_list.append(center_list)
+    print("***** all_sky_center_list [%s]" % (len(all_sky_center_list)))
+    img_wid_hei_list[0] = img_wid
+    img_wid_hei_list[1] = img_hei
     return JsonResponse({'sun_ra': str(sun_radec.ra.deg), 'sun_dec': str(sun_radec.dec.deg),
                          'moon_ra': str(moon_radec.ra.deg), 'moon_dec': str(moon_radec.dec.deg),
                          'ex_message': ex_message, 'sun_curve': sun_curve, 'moon_curve': moon_curve,
@@ -713,6 +720,79 @@ def draw_load_plan(request):
     return JsonResponse({'ex_message': ex_message,
                          'center_ra': str(center_ra.value), 'center_dec': str(center_dec.value),
                          'areas': square_list, 'centers': center_list})
+
+
+def generate_jgg_from_session(request):
+    print("center_list size [%s]  " % (len(all_sky_center_list)))
+    # print(all_sky_center_list)
+    ex_message = ''
+    row_count = len(all_sky_center_list)
+    max_search_row_index = row_count // 3
+    new_jgg_list = []
+    dot_status_list = []
+    print("***** jgg [%s]" % (len(new_jgg_list)))
+    for search_index in range(max_search_row_index):
+
+        row_item_jdd_0 = all_sky_center_list[search_index]
+        row_item_jdd_1 = all_sky_center_list[search_index+1]
+        row_item_jdd_2 = all_sky_center_list[search_index+2]
+        next_index_r01 = 0
+        next_index_r02 = 1
+        next_index_r03 = 2
+        next_index_r11 = 0
+        next_index_r12 = 1
+        next_index_r13 = 2
+        next_index_r21 = 0
+        next_index_r22 = 1
+        next_index_r23 = 2
+        if next_index_r03 > len(row_item_jdd_0) or next_index_r13 > len(row_item_jdd_1) or next_index_r23 > len(row_item_jdd_2):
+            continue
+        jgg_item = [row_item_jdd_0[next_index_r01], row_item_jdd_0[next_index_r02], row_item_jdd_0[next_index_r03],
+                    row_item_jdd_1[next_index_r11], row_item_jdd_1[next_index_r12], row_item_jdd_1[next_index_r13],
+                    row_item_jdd_2[next_index_r21], row_item_jdd_2[next_index_r22], row_item_jdd_2[next_index_r23]]
+        new_jgg_list.append(jgg_item)
+
+    square_jgg_list = []
+    print("***** new_jgg_list [%s]" % (len(new_jgg_list)))
+    # 计算四角点
+    for i in range(len(new_jgg_list)):
+        item_jgg = new_jgg_list[i]
+        square_jgg_list_item = []
+        for j in range(len(item_jgg)):
+            cord_real_center = item_jgg[j]
+            rtt_l, rtt_r, rtt_t, rtt_b = get_rotate_fix_axis(cord_real_center[0], cord_real_center[1])
+            # rtt_l = np.array([0, 0, 1])
+            # rtt_r = np.array([0, 0, -1])
+            # print('[%s]  [%s]              [%s]   [%s]' % (i, j, center_ra_colum, center_dec_colum))
+            coordinates = []
+            img_hei = img_wid_hei_list[1]
+            img_wid = img_wid_hei_list[0]
+            cord_t_c_tm = get_top_fix_axis(cord_real_center[0], cord_real_center[1], (img_hei / 2), rtt_t)
+            cord_t_c_bm = get_bottom_fix_axis(cord_real_center[0], cord_real_center[1], (img_hei / 2), rtt_b)
+            cord_t_c_tl = get_left_fix_axis(cord_t_c_tm.ra.value, cord_t_c_tm.dec.value, (img_wid / 2), rtt_l)
+            cord_t_c_tr = get_right_fix_axis(cord_t_c_tm.ra.value, cord_t_c_tm.dec.value, (img_wid / 2), rtt_r)
+            cord_t_c_bl = get_left_fix_axis(cord_t_c_bm.ra.value, cord_t_c_bm.dec.value, (img_wid / 2), rtt_l)
+            cord_t_c_br = get_right_fix_axis(cord_t_c_bm.ra.value, cord_t_c_bm.dec.value, (img_wid / 2), rtt_r)
+            coordinates.append([cord_t_c_tl.ra.value, cord_t_c_tl.dec.value])
+            coordinates.append([cord_t_c_tr.ra.value, cord_t_c_tr.dec.value])
+            coordinates.append([cord_t_c_br.ra.value, cord_t_c_br.dec.value])
+            coordinates.append([cord_t_c_bl.ra.value, cord_t_c_bl.dec.value])
+            square_jgg_list_item.append(coordinates)
+        square_jgg_list.append(square_jgg_list_item)
+    print("***** square_jgg_list [%s]" % (len(square_jgg_list)))
+    return JsonResponse({'ex_message': ex_message,
+                         # 'center_ra': str(center_ra.value), 'center_dec': str(center_dec.value),
+                         'areas_jgg': square_jgg_list, 'centers_jgg': new_jgg_list})
+
+
+def clear_session_data(request):
+    now_date = datetime.today().strftime('%Y%m%d')
+    req_overlap = float(request.GET.get('req_overlap_deg', 0.2))
+    # 保存数据到会话中
+    all_sky_center_list.clear()
+    print("************* session clear ***********")
+    ex_message = ''
+    return JsonResponse({'ex_message': ex_message})
 
 
 def draw_plan(request):

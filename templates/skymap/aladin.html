@@ -285,6 +285,9 @@
                   <button id="draw-jgg-button" class="btn btn-default">
                     <i class="fas fa-check-circle">九宫格（启动后第一次比较慢）</i>
                   </button>
+                  <button id="combine-jgg-button" class="btn btn-default">
+                    <i class="fas fa-check-circle">拼接九宫格</i>
+                  </button>
                     <span class="">&nbsp;&nbsp;</span>
                   <button id="clear-plan-squire-button" class="btn btn-default">
                     <i class="fas fa-check-circle">清除</i>
@@ -345,10 +348,31 @@
         "pat" : {"name":"PAT" ,"img_w":"1.95","img_h":"1.95"},
         "gy7" : {"name":"GY7" ,"img_w":"3.33333334","img_h":"2.216666667"},
     };
+    function randomHexColor() {
+    const hexChars = '0123456789ABCDEF';
+    let color = '#';
+    for (let i = 0; i < 6; i++) {
+        color += hexChars[random.int(0, 15)];  // 随机选择一个十六进制字符
+    }
+    return color;  // 返回十六进制格式的颜色字符串
+}
     function calc_row_col(temp_image_w, temp_image_h){
         {#let temp_image_w = 2.2166666667;#}
         {#let temp_image_h = 3.3333333334;#}
         {#let start_deg = -10.0;#}
+       $.getJSON( "clear_session_data", {}
+               , function( data ) {
+            toastr.warn('准备生成');
+            let plan_area = data.areas;
+            let overlay_areas = A.graphicOverlay({name: 'areas', color: '#00a0f8', lineWidth: 1});
+            aladin.addOverlay(overlay_areas);
+            console.log("len:  " + plan_area.length)
+            for(let i = 0; i < plan_area.length; i++){
+                overlay_areas.addFootprints([A.polygon(plan_area[i])]);
+            }
+
+       }).fail(function() { toastr.error('服务器错误'); });
+
         let start_deg = 0.0;
         let end_deg = 80.0;
         let dec_wid = end_deg - start_deg;
@@ -356,7 +380,7 @@
         {#let generate_num_south = Math.floor(10 / temp_image_h);#}
         {#let temp_image_w_rad = temp_image_w * Math.PI / 180;#}
 
-        {#generate_num_north = 1;#}
+        generate_num_north = 10;
         for (let i=0;i<generate_num_north;i++){
             let temp_overlap_min = temp_image_w / 200;
             let temp_overlap_max = temp_image_w / 20;
@@ -717,6 +741,31 @@
             console.log("len:  " + plan_area.length)
             for(let i = 0; i < plan_area.length; i++){
                 overlay_areas.addFootprints([A.polygon(plan_area[i])]);
+            }
+
+          }).fail(function() { toastr.error('服务器错误'); });
+       });
+       $("#combine-jgg-button").on("click",function (){
+          let overlap_temp = $("#overlap_val").val();
+          let x_row_temp = $("#x_row_val").val();
+          let y_col_temp = $("#y_col_val").val();
+          let x_img_temp = $("#x_img_val").val();
+          let y_img_temp = $("#y_img_val").val();
+          let x_cen_temp = $("#x_cen_val").val();
+          let y_cen_temp = $("#y_cen_val").val();
+           $.getJSON( "generate_jgg_from_session", {req_overlap_deg:overlap_temp, req_row_int:x_row_temp, req_col_int:y_col_temp,
+              req_x_img_deg:x_img_temp, req_y_img_deg:y_img_temp,req_ra_deg:x_cen_temp,req_dec_deg:y_cen_temp}
+               , function( data ) {
+
+            let plan_area_jgg = data.areas_jgg;
+            for(let i = 0; i < plan_area_jgg.length; i++){
+                let jgg_item = plan_area_jgg[i];
+                let overlay_areas = A.graphicOverlay({name: 'areas', color: randomHexColor(), lineWidth: 1});
+                aladin.addOverlay(overlay_areas);
+                console.log("len:  " + plan_area_jgg.length)
+                for(let j = 0; j < jgg_item.length; j++){
+                    overlay_areas.addFootprints([A.polygon(jgg_item[j])]);
+                }
             }
 
           }).fail(function() { toastr.error('服务器错误'); });

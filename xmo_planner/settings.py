@@ -128,3 +128,9 @@ STATICFILES_DIRS = [
 # https://docs.djangoproject.com/en/4.0/ref/settings/#default-auto-field
 
 DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
+
+# 使用内存存储会话
+SESSION_ENGINE = 'django.contrib.sessions.backends.cache'
+
+# 会话存储选项
+SESSION_CACHE_ALIAS = 'default'
