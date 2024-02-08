@@ -420,19 +420,20 @@ def draw_sun(request):
                          'areas': square_list, 'centers': center_list, 'out_path': out_path})
 
 
-def generate_jgg_from_ra_dec(jgg_0_ra=None, jgg_0_dec=None, sub_num_row_max=None, sub_num_col_max=None, center_margin=None):
+def generate_jgg_from_ra_dec(jgg_0_ra=None, jgg_0_dec=None, sub_num_row_max=None, sub_num_col_max=None,
+                             center_margin_h=0.0, center_margin_w=0.0):
     jgg_center_list = [[0.0, 0.0]] * 9
     rtt_l, rtt_r, rtt_t, rtt_b = get_rotate_fix_axis(jgg_0_ra, jgg_0_dec)
     for i_row in range(sub_num_row_max):
-        cord_row_head_center_item = get_top_fix_axis(jgg_0_ra, jgg_0_dec, center_margin * i_row, rtt_t)
-        jgg_next_head_ra = cord_row_head_center_item.ra.value
+        cord_row_head_center_item = get_top_fix_axis(jgg_0_ra, jgg_0_dec, center_margin_h * i_row, rtt_t)
+        # jgg_next_head_ra = cord_row_head_center_item.ra.value
+        jgg_next_head_ra = jgg_0_ra
         jgg_next_head_dec = cord_row_head_center_item.dec.value
         jgg_center_list[i_row * 3] = [jgg_next_head_ra, jgg_next_head_dec]
 
         for i_col in range(1, sub_num_col_max):
             rtt_l, rtt_r, rtt_t, rtt_b = get_rotate_fix_axis(jgg_next_head_ra, jgg_next_head_dec)
-            cord_row_head_center_item = get_right_fix_axis(jgg_next_head_ra, jgg_next_head_dec,
-                                                           center_margin, rtt_l)
+            cord_row_head_center_item = get_left_fix_axis(jgg_next_head_ra, jgg_next_head_dec, center_margin_w, rtt_l)
             jgg_next_head_ra = cord_row_head_center_item.ra.value
             jgg_center_list[i_row * 3 + i_col] = [jgg_next_head_ra, jgg_next_head_dec]
     return jgg_center_list
@@ -484,23 +485,24 @@ def draw_all_sky_by_jgg(request):
     # jgg_0_dec = cen_dec_row
     jgg_0_ra = req_ra_cen_deg
     jgg_0_dec = req_dec_cen_deg
+    cen_margin_w = img_wid - img_overlap
+    cen_margin_h = img_hei - img_overlap
+    print("overlap h [%s]  = [%s] - [%s]" % (cen_margin_w, img_hei, img_overlap))
+    print("overlap w [%s]  = [%s] - [%s]" % (cen_margin_h, img_wid, img_overlap))
     print("jgg_dec [%s]  req dec [%s]" % (jgg_0_dec, req_row_max_dec_deg))
-    while jgg_0_dec < req_row_max_dec_deg and current_line_index < 200:
+    while jgg_0_dec < req_row_max_dec_deg:
         # jgg_center_list = [[0.0, 0.0]] * 9
 
-        jgg_center_list = generate_jgg_from_ra_dec(jgg_0_ra, jgg_0_dec, sub_num_row_max, sub_num_col_max, img_hei-img_overlap)
+        jgg_center_list = generate_jgg_from_ra_dec(jgg_0_ra, jgg_0_dec, sub_num_row_max, sub_num_col_max, cen_margin_h, cen_margin_w)
 
         temp_head_next_ra = jgg_center_list[6][0]
         temp_head_next_dec = jgg_center_list[6][1]
-        temp_next_start_center = get_top_fix_axis(temp_head_next_ra, temp_head_next_dec, img_hei-img_overlap, rtt_t)
+        temp_next_start_center = get_top_fix_axis(temp_head_next_ra, temp_head_next_dec, cen_margin_h, rtt_t)
         jgg_0_ra = temp_next_start_center.ra.value
         jgg_0_dec = temp_next_start_center.dec.value
         row_head_jgg_list.append(jgg_center_list)
 
-        current_line_index = current_line_index + 1
-        if current_line_index > 100:
-            print("too much result! %s" % current_line_index)
-
+    print("head jgg[%s]" % (len(row_head_jgg_list)))
     # 补全所有列的其他九宫格
     all_jgg_list = []
     for i_jgg_head in range(len(row_head_jgg_list)):
@@ -508,19 +510,39 @@ def draw_all_sky_by_jgg(request):
         row_last_ra_jgg_2 = row_head_jgg_list[i_jgg_head][2][0]
         row_last_dec_jgg_2 = row_head_jgg_list[i_jgg_head][2][1]
         rtt_l, rtt_r, rtt_t, rtt_b = get_rotate_fix_axis(row_last_ra_jgg_2, row_last_dec_jgg_2)
-        row_next_start_center = get_right_fix_axis(row_last_ra_jgg_2, row_last_dec_jgg_2, img_hei-img_overlap, rtt_l)
+        row_next_start_center = get_left_fix_axis(row_last_ra_jgg_2, row_last_dec_jgg_2, cen_margin_w, rtt_l)
         row_next_ra_jgg_0 = row_next_start_center.ra.value
-        row_next_dec_jgg_0 = row_next_start_center.dec.value
-        while row_next_ra_jgg_0 < req_col_max_ra_deg:
+        row_next_dec_jgg_0 = row_last_dec_jgg_2
+
+        break_check_item_0 = row_head_jgg_list[i_jgg_head][0]
+        break_check_item_1 = row_head_jgg_list[i_jgg_head][1]
+        break_check_item_7 = row_head_jgg_list[i_jgg_head][7]
+        ra_deg_counter_row_1 = 3*(break_check_item_1[0] - break_check_item_0[0])
+        ra_deg_counter_row_3 = 3*(break_check_item_7[0] - break_check_item_0[0])
+
+        while req_col_max_ra_deg > row_next_ra_jgg_0 > (img_wid * 2):
             row_jgg_center_list = generate_jgg_from_ra_dec(row_next_ra_jgg_0, row_next_dec_jgg_0, sub_num_row_max,
-                                                           sub_num_col_max, img_hei - img_overlap)
+                                                           sub_num_col_max,  cen_margin_h, cen_margin_w)
             temp_head_next_ra = row_jgg_center_list[2][0]
             temp_head_next_dec = row_jgg_center_list[2][1]
             all_jgg_list.append(row_jgg_center_list)
             rtt_l, rtt_r, rtt_t, rtt_b = get_rotate_fix_axis(temp_head_next_ra, temp_head_next_dec)
-            temp_row_next_jgg_0 = get_right_fix_axis(temp_head_next_ra, temp_head_next_dec, img_hei - img_overlap, rtt_l)
+            temp_row_next_jgg_0 = get_left_fix_axis(temp_head_next_ra, temp_head_next_dec, cen_margin_w, rtt_l)
             row_next_ra_jgg_0 = temp_row_next_jgg_0.ra.value
-            row_next_dec_jgg_0 = temp_row_next_jgg_0.dec.value
+            row_next_dec_jgg_0 = row_last_dec_jgg_2
+            break_now = False
+            for break_check_item in row_jgg_center_list:
+                if break_check_item[0] > req_col_max_ra_deg or break_check_item[0] < (img_wid * 2):
+                    break_now = True
+            break_check_item_0 = row_jgg_center_list[0]
+            break_check_item_1 = row_jgg_center_list[1]
+            break_check_item_7 = row_jgg_center_list[7]
+            ra_deg_counter_row_1 = ra_deg_counter_row_1 + 3*(break_check_item_1[0] - break_check_item_0[0])
+            ra_deg_counter_row_3 = ra_deg_counter_row_3 + 3*(break_check_item_7[0] - break_check_item_0[0])
+            if row_next_dec_jgg_0 > 50 and ra_deg_counter_row_1 > req_col_max_ra_deg:
+                break_now = True
+            if break_now:
+                break
 
     print("jgg: [%s]   head jgg[%s]" % (len(all_jgg_list), len(row_head_jgg_list)))
     # 计算四角点
@@ -528,6 +550,7 @@ def draw_all_sky_by_jgg(request):
 
         for i_item_jgg in range(9):
             cord_real_center = all_jgg_list[i_all_jgg][i_item_jgg]
+            center_list.append(cord_real_center)
             rtt_l, rtt_r, rtt_t, rtt_b = get_rotate_fix_axis(cord_real_center[0], cord_real_center[1])
             # rtt_l = np.array([0, 0, 1])
             # rtt_r = np.array([0, 0, -1])

@@ -158,13 +158,13 @@
         <div class="row">
             <div class="col-md-2">
                 <div class="input-group-append">
-                    <label class="col-form-label" for="inputWarning"><i class="far fa-flash"></i>RA</label>
+                    <label class="col-form-label" for="x_cen_val"><i class="far fa-flash"></i>RA</label>
                     <input type="text" class="form-control is-warning" id="x_cen_val" placeholder="RA" value="0">
                 </div>
             </div>
             <div class="col-md-2">
                 <div class="input-group-append">
-                    <label class="col-form-label" for="inputWarning"><i class="far fa-flash"></i>Dec</label>
+                    <label class="col-form-label" for="y_cen_val"><i class="far fa-flash"></i>Dec</label>
                     <input type="text" class="form-control is-warning" id="y_cen_val" placeholder="Dec" value="0">
                 </div>
             </div>
@@ -179,26 +179,38 @@
         <div class="row">
             <div class="col-md-2">
                 <div class="input-group-append">
-                    <label class="col-form-label" for="inputWarning"><i class="far fa-flash"></i>行 row</label>
+                    <label class="col-form-label" for="x_row_val"><i class="far fa-flash"></i>行 row</label>
                     <input type="text" class="form-control is-warning" id="x_row_val" placeholder="行 row" value="3">
                 </div>
             </div>
             <div class="col-md-2">
                 <div class="input-group-append">
-                    <label class="col-form-label" for="inputWarning"><i class="far  fa-arrows-v"></i>列 col</label>
+                    <label class="col-form-label" for="y_col_val"><i class="far  fa-arrows-v"></i>列 col</label>
                     <input type="text" class="form-control is-warning" id="y_col_val" placeholder="列 col" value="3">
                 </div>
             </div>
             <div class="col-md-2">
                 <div class="input-group-append">
-                    <label class="col-form-label" for="inputWarning"><i class="far  fa-arrows-v"></i>宽</label>
+                    <label class="col-form-label" for="x_img_val"><i class="far  fa-arrows-v"></i>宽</label>
                     <input type="text" class="form-control is-warning" id="x_img_val" placeholder="宽" value="3.333333334">
                 </div>
             </div>
             <div class="col-md-2">
                 <div class="input-group-append">
-                    <label class="col-form-label" for="inputWarning"><i class="far  fa-arrows-v"></i>高</label>
+                    <label class="col-form-label" for="y_img_val"><i class="far  fa-arrows-v"></i>高</label>
                     <input type="text" class="form-control is-warning" id="y_img_val" placeholder="高" value="2.216666667">
+                </div>
+            </div>
+            <div class="col-md-2">
+                <div class="input-group-append">
+                    <label class="col-form-label" for="req_col_max_ra_deg"><i class="far  fa-arrows-v"></i>RA max</label>
+                    <input type="text" class="form-control is-warning" id="req_col_max_ra_deg" placeholder="RA max" value="355.0">
+                </div>
+            </div>
+            <div class="col-md-2">
+                <div class="input-group-append">
+                    <label class="col-form-label" for="req_row_max_dec_deg"><i class="far  fa-arrows-v"></i>Dec max</label>
+                    <input type="text" class="form-control is-warning" id="req_row_max_dec_deg" placeholder="Dec max" value="80.0">
                 </div>
             </div>
         </div>
@@ -253,8 +265,8 @@
         <div class="row">
             <div class="col-md-4">
                 <div class="input-group-append">
-                    <label class="col-form-label" for="inputWarning"><i class="far fa-bell"></i>重叠量 overlap （度 deg） </label>
-                    <input type="text" class="form-control is-warning" id="overlap_val" placeholder="重叠量 overlap （度 deg）" value="0.2">
+                    <label class="col-form-label" for="overlap_val"><i class="far fa-bell"></i>重叠量 overlap （度 deg） </label>
+                    <input type="text" class="form-control is-warning" id="overlap_val" placeholder="重叠量 overlap （度 deg）" value="0.04">
                 </div>
             </div>
         </div>
@@ -283,8 +295,8 @@
         <div class="row">
             <div class="col-md-4">
                 <div class="input-group-append">
-                    <label class="col-form-label" for="inputWarning">plan 存放目录：</label>
-                    <label id="out-plan-path" class="col-form-label" for="inputWarning">-- </label>
+                    <label class="col-form-label" >plan 存放目录：</label>
+                    <label id="out-plan-path" class="col-form-label" >-- </label>
                 </div>
             </div>
         </div>
@@ -344,7 +356,7 @@
         {#let generate_num_south = Math.floor(10 / temp_image_h);#}
         {#let temp_image_w_rad = temp_image_w * Math.PI / 180;#}
 
-        {#generate_num_north = 5;#}
+        {#generate_num_north = 1;#}
         for (let i=0;i<generate_num_north;i++){
             let temp_overlap_min = temp_image_w / 200;
             let temp_overlap_max = temp_image_w / 20;
@@ -593,10 +605,12 @@
           let y_img_temp = $("#y_img_val").val();
           let x_cen_temp = $("#x_cen_val").val();
           let y_cen_temp = $("#y_cen_val").val();
+          let col_max_ra_deg_temp = $("#req_col_max_ra_deg").val();
+          let row_max_dec_deg_temp = $("#req_row_max_dec_deg").val();
           console.log("sys_name: " + current_sys_name)
           $.getJSON( "draw_all_sky_by_jgg", {req_overlap_deg:overlap_temp, req_row_int:x_row_temp, req_col_int:y_col_temp,
               req_x_img_deg:x_img_temp, req_y_img_deg:y_img_temp,req_ra_deg:x_cen_temp,req_dec_deg:y_cen_temp,
-              req_sys_name:current_sys_name,
+              req_sys_name:current_sys_name,req_col_max_ra_deg:col_max_ra_deg_temp,req_row_max_dec_deg:row_max_dec_deg_temp,
               }, function( data ) {
               console.log(data);
 
@@ -621,17 +635,17 @@
             }
 
 
-			{#let marker_cen = A.marker(data.center_ra, data.center_dec, {popupTitle: 'Cen', popupDesc: data.center_ra+'  '+data.center_dec});#}
-			{#let markerLayer_cen = A.catalog({name: 'Center', sourceSize: 10,color: '#cc00ff'});#}
-            {##}
-            {#let centers_data = data.centers;#}
-            //for(let i = 0; i < centers_data.length; i++) {
-                {#let marker_cen_item = A.marker(centers_data[i][0], centers_data[i][1], {popupTitle: 'Cen', popupDesc: centers_data[i][0]+'  '+centers_data[i][1]});#}
-                {#markerLayer_cen.addSources([marker_cen_item]);#}
-            //}
+			let marker_cen = A.marker(data.center_ra, data.center_dec, {popupTitle: 'Cen', popupDesc: data.center_ra+'  '+data.center_dec});
+			let markerLayer_cen = A.catalog({name: 'Center', sourceSize: 10,color: '#cc00ff'});
 
-			{#aladin.addCatalog(markerLayer_cen);#}
-			{#markerLayer_cen.addSources([marker_cen]);#}
+            let centers_data = data.centers;
+            for(let i = 0; i < centers_data.length; i++) {
+                let marker_cen_item = A.marker(centers_data[i][0], centers_data[i][1], {popupTitle: 'Cen', popupDesc: centers_data[i][0]+'  '+centers_data[i][1]});
+                markerLayer_cen.addSources([marker_cen_item]);
+            }
+
+			aladin.addCatalog(markerLayer_cen);
+			markerLayer_cen.addSources([marker_cen]);
             console.log(data.center_ra)
             console.log(data.center_dec)
 
