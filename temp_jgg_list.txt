@@ -1,0 +1,7 @@
+; ========jgg plan generater================
+
+
+replace_plan_items
+
+
+; ========jgg plan generater end================

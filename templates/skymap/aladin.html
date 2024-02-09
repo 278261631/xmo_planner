@@ -348,11 +348,16 @@
         "pat" : {"name":"PAT" ,"img_w":"1.95","img_h":"1.95"},
         "gy7" : {"name":"GY7" ,"img_w":"3.33333334","img_h":"2.216666667"},
     };
+    function getRandomInt(min, max) {
+      min = Math.ceil(min);
+      max = Math.floor(max);
+      return Math.floor(Math.random() * (max - min)) + min; // 不含最大值，含最小值
+    }
     function randomHexColor() {
     const hexChars = '0123456789ABCDEF';
     let color = '#';
     for (let i = 0; i < 6; i++) {
-        color += hexChars[random.int(0, 15)];  // 随机选择一个十六进制字符
+        color += hexChars[getRandomInt(0, 15)];  // 随机选择一个十六进制字符
     }
     return color;  // 返回十六进制格式的颜色字符串
 }
@@ -362,25 +367,20 @@
         {#let start_deg = -10.0;#}
        $.getJSON( "clear_session_data", {}
                , function( data ) {
-            toastr.warn('准备生成');
-            let plan_area = data.areas;
-            let overlay_areas = A.graphicOverlay({name: 'areas', color: '#00a0f8', lineWidth: 1});
-            aladin.addOverlay(overlay_areas);
-            console.log("len:  " + plan_area.length)
-            for(let i = 0; i < plan_area.length; i++){
-                overlay_areas.addFootprints([A.polygon(plan_area[i])]);
-            }
-
+            toastr.warning('准备生成');
        }).fail(function() { toastr.error('服务器错误'); });
 
         let start_deg = 0.0;
-        let end_deg = 80.0;
+        let end_deg = 85.0;
         let dec_wid = end_deg - start_deg;
         let generate_num_north = Math.floor(dec_wid / temp_image_h) + 1;
+        if(generate_num_north % 3 > 0){
+            generate_num_north = generate_num_north + 3 - (generate_num_north % 3);
+        }
         {#let generate_num_south = Math.floor(10 / temp_image_h);#}
         {#let temp_image_w_rad = temp_image_w * Math.PI / 180;#}
 
-        generate_num_north = 10;
+        generate_num_north = 4;
         for (let i=0;i<generate_num_north;i++){
             let temp_overlap_min = temp_image_w / 200;
             let temp_overlap_max = temp_image_w / 20;
@@ -572,6 +572,7 @@
 			aladin.addCatalog(markerLayer_moon_curve);
 			markerLayer_moon_curve.addSources(markers_moon);
 
+            return;
             let plan_area = data.areas;
             let overlay_areas = A.graphicOverlay({name: 'areas', color: '#8ebd84', lineWidth: 1});
             aladin.addOverlay(overlay_areas);
@@ -758,15 +759,27 @@
                , function( data ) {
 
             let plan_area_jgg = data.areas_jgg;
+            console.log("len:  " + plan_area_jgg.length)
             for(let i = 0; i < plan_area_jgg.length; i++){
                 let jgg_item = plan_area_jgg[i];
                 let overlay_areas = A.graphicOverlay({name: 'areas', color: randomHexColor(), lineWidth: 1});
                 aladin.addOverlay(overlay_areas);
-                console.log("len:  " + plan_area_jgg.length)
+                console.log("len:  " + jgg_item.length)
                 for(let j = 0; j < jgg_item.length; j++){
                     overlay_areas.addFootprints([A.polygon(jgg_item[j])]);
                 }
             }
+
+		   let markerLayer_cen = A.catalog({name: 'Center', sourceSize: 10,color: '#88a1fd'});
+           for(let i = 0; i < data.centers_jgg.length; i++){
+                let centers_data = data.centers_jgg[i];
+                console.log(centers_data);
+                for(let i = 0; i < centers_data.length; i++) {
+                    let marker_cen_item = A.marker(centers_data[i][0], centers_data[i][1], {popupTitle: 'Cen', popupDesc: centers_data[i][0]+'  '+centers_data[i][1]});
+                    markerLayer_cen.addSources([marker_cen_item]);
+                }
+           }
+			aladin.addCatalog(markerLayer_cen);
 
           }).fail(function() { toastr.error('服务器错误'); });
        });

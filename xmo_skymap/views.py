@@ -14,7 +14,7 @@ from django.core.cache import cache
 from django.template import loader
 import astropy.units as u
 
-from xmo_skymap.plan_gen_tool import load_item_template, write_plan_file
+from xmo_skymap.plan_gen_tool import load_item_template, write_plan_file, write_jgg_plan_file
 from xmo_skymap.rotate_tools import get_l_r_t_b_axis, rotate, get_top, get_left, get_right, get_bottom, \
     get_rotate_fix_axis, get_top_fix_axis, get_right_fix_axis, get_bottom_fix_axis, get_left_fix_axis
 
@@ -22,7 +22,7 @@ matplotlib.use('TkAgg')
 from matplotlib import pyplot as plt
 
 all_sky_center_list = []
-img_wid_hei_list = [1.0, 1.0]
+img_wid_hei_list = [1.0, 1.0, 'xmo_auto_']
 
 
 def index(request):
@@ -413,13 +413,14 @@ def draw_sun(request):
     temp_list_file_path = os.path.join(template_root_path, temp_list_file_name)
     print("单目标模板：[%s]   计划文件模板：[%s]   输出文件:[%s]" % (temp_item_file_path, temp_list_file_path, out_path))
     print(temp_list_file_path)
-    template_item_content = load_item_template(temp_item_file_path)
-    write_plan_file(temp_list_file_path, center_list, out_path, template_item_content)
+    # template_item_content = load_item_template(temp_item_file_path)
+    # write_plan_file(temp_list_file_path, center_list, out_path, template_item_content)
 
     all_sky_center_list.append(center_list)
     print("***** all_sky_center_list [%s]" % (len(all_sky_center_list)))
     img_wid_hei_list[0] = img_wid
     img_wid_hei_list[1] = img_hei
+    img_wid_hei_list[2] = req_sys_name
     return JsonResponse({'sun_ra': str(sun_radec.ra.deg), 'sun_dec': str(sun_radec.dec.deg),
                          'moon_ra': str(moon_radec.ra.deg), 'moon_dec': str(moon_radec.dec.deg),
                          'ex_message': ex_message, 'sun_curve': sun_curve, 'moon_curve': moon_curve,
@@ -723,6 +724,7 @@ def draw_load_plan(request):
 
 
 def generate_jgg_from_session(request):
+    req_sys_name = img_wid_hei_list[2]
     print("center_list size [%s]  " % (len(all_sky_center_list)))
     # print(all_sky_center_list)
     ex_message = ''
@@ -730,27 +732,47 @@ def generate_jgg_from_session(request):
     max_search_row_index = row_count // 3
     new_jgg_list = []
     dot_status_list = []
+    all_sky_center_list_sorted = sorted(all_sky_center_list, key=lambda x: x[0][1])
     print("***** jgg [%s]" % (len(new_jgg_list)))
+    next_index_r01 = 0
+    next_index_r02 = 1
+    next_index_r03 = 2
+    next_index_r11 = 0
+    next_index_r12 = 1
+    next_index_r13 = 2
+    next_index_r21 = 0
+    next_index_r22 = 1
+    next_index_r23 = 2
     for search_index in range(max_search_row_index):
 
-        row_item_jdd_0 = all_sky_center_list[search_index]
-        row_item_jdd_1 = all_sky_center_list[search_index+1]
-        row_item_jdd_2 = all_sky_center_list[search_index+2]
-        next_index_r01 = 0
-        next_index_r02 = 1
-        next_index_r03 = 2
-        next_index_r11 = 0
-        next_index_r12 = 1
-        next_index_r13 = 2
-        next_index_r21 = 0
-        next_index_r22 = 1
-        next_index_r23 = 2
-        if next_index_r03 > len(row_item_jdd_0) or next_index_r13 > len(row_item_jdd_1) or next_index_r23 > len(row_item_jdd_2):
-            continue
-        jgg_item = [row_item_jdd_0[next_index_r01], row_item_jdd_0[next_index_r02], row_item_jdd_0[next_index_r03],
-                    row_item_jdd_1[next_index_r11], row_item_jdd_1[next_index_r12], row_item_jdd_1[next_index_r13],
-                    row_item_jdd_2[next_index_r21], row_item_jdd_2[next_index_r22], row_item_jdd_2[next_index_r23]]
-        new_jgg_list.append(jgg_item)
+        row_item_jdd_0 = all_sky_center_list_sorted[3 * search_index]
+        row_item_jdd_1 = all_sky_center_list_sorted[3 * search_index+1]
+        row_item_jdd_2 = all_sky_center_list_sorted[3 * search_index+2]
+        while True:
+            if next_index_r03 >= len(row_item_jdd_0) or next_index_r13 >= len(row_item_jdd_1) or next_index_r23 >= len(row_item_jdd_2):
+                next_index_r01 = 0
+                next_index_r02 = 1
+                next_index_r03 = 2
+                next_index_r11 = 0
+                next_index_r12 = 1
+                next_index_r13 = 2
+                next_index_r21 = 0
+                next_index_r22 = 1
+                next_index_r23 = 2
+                break
+            jgg_item = [row_item_jdd_0[next_index_r01], row_item_jdd_0[next_index_r02], row_item_jdd_0[next_index_r03],
+                        row_item_jdd_1[next_index_r11], row_item_jdd_1[next_index_r12], row_item_jdd_1[next_index_r13],
+                        row_item_jdd_2[next_index_r21], row_item_jdd_2[next_index_r22], row_item_jdd_2[next_index_r23]]
+            new_jgg_list.append(jgg_item)
+            next_index_r01 = next_index_r01 + 3
+            next_index_r02 = next_index_r02 + 3
+            next_index_r03 = next_index_r03 + 3
+            next_index_r11 = next_index_r11 + 3
+            next_index_r12 = next_index_r12 + 3
+            next_index_r13 = next_index_r13 + 3
+            next_index_r21 = next_index_r21 + 3
+            next_index_r22 = next_index_r22 + 3
+            next_index_r23 = next_index_r23 + 3
 
     square_jgg_list = []
     print("***** new_jgg_list [%s]" % (len(new_jgg_list)))
@@ -780,6 +802,25 @@ def generate_jgg_from_session(request):
             square_jgg_list_item.append(coordinates)
         square_jgg_list.append(square_jgg_list_item)
     print("***** square_jgg_list [%s]" % (len(square_jgg_list)))
+    # 获取当前时间
+    current_time = Time.now()
+    current_time_with_tz = current_time.to_datetime(pytz.timezone('Asia/Shanghai'))
+    print(f"当前时间：{current_time_with_tz.strftime('%Y-%m-%d %H:%M:%S %Z')}")
+
+    template_root_path = "e:/test"
+    output_root_path = "e:/test"
+    time_str = current_time_with_tz.strftime('%Y%m%d_%H%M%S_%Z')
+    out_path = os.path.join(output_root_path, "%s_%s.txt" % (req_sys_name, time_str))
+
+    temp_item_file_name = "temp_jgg_item.txt"
+    temp_list_file_name = "temp_jgg_list.txt"
+    temp_item_file_path = os.path.join(template_root_path, temp_item_file_name)
+    temp_list_file_path = os.path.join(template_root_path, temp_list_file_name)
+    print("单目标模板：[%s]   计划文件模板：[%s]   输出文件:[%s]" % (temp_item_file_path, temp_list_file_path, out_path))
+    print(temp_list_file_path)
+    template_item_content = load_item_template(temp_item_file_path)
+    write_jgg_plan_file(temp_list_file_path, new_jgg_list, out_path, template_item_content)
+
     return JsonResponse({'ex_message': ex_message,
                          # 'center_ra': str(center_ra.value), 'center_dec': str(center_dec.value),
                          'areas_jgg': square_jgg_list, 'centers_jgg': new_jgg_list})

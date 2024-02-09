@@ -1,0 +1,15 @@
+
+;begin
+#DIR Preplace_jgg_index_replace_jgg_center_radec
+Preplace_jgg_index_sub-1	replace_ra_deg_1	replace_dec_deg_1
+Preplace_jgg_index_sub-2	replace_ra_deg_2	replace_dec_deg_2
+Preplace_jgg_index_sub-3	replace_ra_deg_3	replace_dec_deg_3
+Preplace_jgg_index_sub-4	replace_ra_deg_4	replace_dec_deg_4
+Preplace_jgg_index_sub-5	replace_ra_deg_5	replace_dec_deg_5
+Preplace_jgg_index_sub-6	replace_ra_deg_6	replace_dec_deg_6
+Preplace_jgg_index_sub-7	replace_ra_deg_7	replace_dec_deg_7
+Preplace_jgg_index_sub-8	replace_ra_deg_8	replace_dec_deg_8
+Preplace_jgg_index_sub-9	replace_ra_deg_9	replace_dec_deg_9
+
+;end
+
