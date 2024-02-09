@@ -143,104 +143,120 @@ def draw_sun(request):
     rtt_r = np.array([0, 0, -1])
     # rtt_t = np.array([1, 0, 0])
     # rtt_b = np.array([-1, 0, 0])
-    if num_row % 2 == 0:
-        half_row = num_row // 2
-        for i in range(half_row):
-            cord_row_head_center_item = get_top_fix_axis(cen_ra_row, cen_dec_row, ((img_hei - img_overlap) * i)
-                                                         + ((img_hei / 2) - (img_overlap / 2)), rtt_t)
-            row_head_coord_list.append(cord_row_head_center_item)
-        # reverse top list
-        row_head_coord_list.reverse()
-        for i in range(half_row):
-            cord_row_head_center_item = get_bottom_fix_axis(cen_ra_row, cen_dec_row, ((img_hei - img_overlap) * i)
-                                                            + ((img_hei / 2) - (img_overlap / 2)), rtt_b)
-            row_head_coord_list.append(cord_row_head_center_item)
-    else:
-        half_row = num_row // 2
-        for i in range(half_row):
-            cord_row_head_center_item = get_top_fix_axis(cen_ra_row, cen_dec_row, (img_hei - img_overlap) * (i + 1),
-                                                         rtt_t)
-            row_head_coord_list.append(cord_row_head_center_item)
-        # reverse top list
-        row_head_coord_list.reverse()
-        row_head_coord_list.append(SkyCoord(ra=cen_ra_row, dec=cen_dec_row, unit='deg').transform_to('gcrs'))
-        for i in range(half_row):
-            cord_row_head_center_item = get_bottom_fix_axis(cen_ra_row, cen_dec_row, (img_hei - img_overlap) * (i + 1),
-                                                            rtt_b)
-            row_head_coord_list.append(cord_row_head_center_item)
 
     # 一种起始点为左下角的row算法
-    # for i in range(num_row):
-    #     cord_row_head_center_item = get_top_fix_axis(cen_ra_row, cen_dec_row, (img_hei-img_overlap)*i, rtt_t)
-    #     row_head_coord_list.append(cord_row_head_center_item)
-    # 计算所有实际中心点
-
     for i in range(num_row):
-        row_center_ra = row_head_coord_list[i].ra.value
-        row_center_dec = row_head_coord_list[i].dec.value
+        cord_row_head_center_item = get_top_fix_axis(cen_ra_row, cen_dec_row, (img_hei-img_overlap)*i, rtt_t)
+        row_head_coord_list.append(cord_row_head_center_item)
+    # 计算所有实际中心点
+    for i in range(num_row):
+        center_ra_colum = row_head_coord_list[i].ra.value
+        center_dec_colum = row_head_coord_list[i].dec.value
+        rtt_l, rtt_r, rtt_t, rtt_b = get_rotate_fix_axis(center_ra_colum, center_dec_colum)
         cord_t_c = row_head_coord_list[i]
+        for j in range(num_colum):
+            rtt_l, rtt_r, rtt_t, rtt_b = get_rotate_fix_axis(center_ra_colum, center_dec_colum)
+            first_angle = 1
+            if j == 0:
+                first_angle = 2
+            cord_t_c_dec_by_z = get_right_fix_axis(center_ra_colum, center_dec_colum,
+                                                   ((img_wid - img_overlap) / first_angle), rtt_r)
+            center_ra_colum = cord_t_c_dec_by_z.ra.value
+            center_list.append([center_ra_colum, center_dec_colum])
 
-        if num_colum % 2 == 0:
-            half_colum = num_colum // 2
-            temp_center_coordinates = []
-            pre_center_ra_colum = row_center_ra
-            pre_center_dec_colum = row_center_dec
-            for j in range(half_colum):
-                # rtt_l = np.array([0, 0, 1])
-                # rtt_r = np.array([0, 0, -1])
-                rtt_l, rtt_r, rtt_t, rtt_b = get_rotate_fix_axis(pre_center_ra_colum, pre_center_dec_colum)
-                first_angle = 1
-                if j == 0:
-                    first_angle = 2
-                cord_t_c_dec_by_z = get_left_fix_axis(pre_center_ra_colum, pre_center_dec_colum,
-                                                      ((img_wid - img_overlap) / first_angle), rtt_l)
-                pre_center_ra_colum = cord_t_c_dec_by_z.ra.value
-                # pre_center_dec_colum = cord_t_c_dec_by_z.dec.value
-                temp_center_coordinates.append([pre_center_ra_colum, pre_center_dec_colum])
-            temp_center_coordinates.reverse()
-            pre_center_ra_colum = row_center_ra
-            pre_center_dec_colum = row_center_dec
-            for j in range(half_colum):
-                # rtt_l = np.array([0, 0, 1])
-                # rtt_r = np.array([0, 0, -1])
-                rtt_l, rtt_r, rtt_t, rtt_b = get_rotate_fix_axis(pre_center_ra_colum, pre_center_dec_colum)
-                first_angle = 1
-                if j == 0:
-                    first_angle = 2
-                cord_t_c_dec_by_z = get_right_fix_axis(pre_center_ra_colum, pre_center_dec_colum,
-                                                       ((img_wid - img_overlap) / first_angle), rtt_r)
-                pre_center_ra_colum = cord_t_c_dec_by_z.ra.value
-                # pre_center_dec_colum = cord_t_c_dec_by_z.dec.value
-                temp_center_coordinates.append([pre_center_ra_colum, pre_center_dec_colum])
-            center_list.extend(temp_center_coordinates)
-        else:
-            half_colum = num_colum // 2
-            temp_center_coordinates = []
-            pre_center_ra_colum = row_center_ra
-            pre_center_dec_colum = row_center_dec
-            for j in range(half_colum):
-                # rtt_l = np.array([0, 0, 1])
-                # rtt_r = np.array([0, 0, -1])
-                rtt_l, rtt_r, rtt_t, rtt_b = get_rotate_fix_axis(pre_center_ra_colum, pre_center_dec_colum)
-                cord_t_c_dec_by_z = get_left_fix_axis(pre_center_ra_colum, pre_center_dec_colum,
-                                                      (img_wid - img_overlap), rtt_l)
-                pre_center_ra_colum = cord_t_c_dec_by_z.ra.value
-                # pre_center_dec_colum = cord_t_c_dec_by_z.dec.value
-                temp_center_coordinates.append([pre_center_ra_colum, pre_center_dec_colum])
-            temp_center_coordinates.reverse()
-            temp_center_coordinates.append([row_center_ra, row_center_dec])
-            pre_center_ra_colum = row_center_ra
-            pre_center_dec_colum = row_center_dec
-            for j in range(half_colum):
-                # rtt_l = np.array([0, 0, 1])
-                # rtt_r = np.array([0, 0, -1])
-                rtt_l, rtt_r, rtt_t, rtt_b = get_rotate_fix_axis(pre_center_ra_colum, pre_center_dec_colum)
-                cord_t_c_dec_by_z = get_right_fix_axis(pre_center_ra_colum, pre_center_dec_colum,
-                                                       (img_wid - img_overlap), rtt_r)
-                pre_center_ra_colum = cord_t_c_dec_by_z.ra.value
-                # pre_center_dec_colum = cord_t_c_dec_by_z.dec.value
-                temp_center_coordinates.append([pre_center_ra_colum, pre_center_dec_colum])
-            center_list.extend(temp_center_coordinates)
+    # 中心向两侧拓展生成
+    # if num_row % 2 == 0:
+    #     half_row = num_row // 2
+    #     for i in range(half_row):
+    #         cord_row_head_center_item = get_top_fix_axis(cen_ra_row, cen_dec_row, ((img_hei - img_overlap) * i)
+    #                                                      + ((img_hei / 2) - (img_overlap / 2)), rtt_t)
+    #         row_head_coord_list.append(cord_row_head_center_item)
+    #     # reverse top list
+    #     row_head_coord_list.reverse()
+    #     for i in range(half_row):
+    #         cord_row_head_center_item = get_bottom_fix_axis(cen_ra_row, cen_dec_row, ((img_hei - img_overlap) * i)
+    #                                                         + ((img_hei / 2) - (img_overlap / 2)), rtt_b)
+    #         row_head_coord_list.append(cord_row_head_center_item)
+    # else:
+    #     half_row = num_row // 2
+    #     for i in range(half_row):
+    #         cord_row_head_center_item = get_top_fix_axis(cen_ra_row, cen_dec_row, (img_hei - img_overlap) * (i + 1),
+    #                                                      rtt_t)
+    #         row_head_coord_list.append(cord_row_head_center_item)
+    #     # reverse top list
+    #     row_head_coord_list.reverse()
+    #     row_head_coord_list.append(SkyCoord(ra=cen_ra_row, dec=cen_dec_row, unit='deg').transform_to('gcrs'))
+    #     for i in range(half_row):
+    #         cord_row_head_center_item = get_bottom_fix_axis(cen_ra_row, cen_dec_row, (img_hei - img_overlap) * (i + 1),
+    #                                                         rtt_b)
+    #         row_head_coord_list.append(cord_row_head_center_item)
+    #
+    # for i in range(num_row):
+    #     row_center_ra = row_head_coord_list[i].ra.value
+    #     row_center_dec = row_head_coord_list[i].dec.value
+    #     cord_t_c = row_head_coord_list[i]
+    #
+    #     if num_colum % 2 == 0:
+    #         half_colum = num_colum // 2
+    #         temp_center_coordinates = []
+    #         pre_center_ra_colum = row_center_ra
+    #         pre_center_dec_colum = row_center_dec
+    #         for j in range(half_colum):
+    #             # rtt_l = np.array([0, 0, 1])
+    #             # rtt_r = np.array([0, 0, -1])
+    #             rtt_l, rtt_r, rtt_t, rtt_b = get_rotate_fix_axis(pre_center_ra_colum, pre_center_dec_colum)
+    #             first_angle = 1
+    #             if j == 0:
+    #                 first_angle = 2
+    #             cord_t_c_dec_by_z = get_left_fix_axis(pre_center_ra_colum, pre_center_dec_colum,
+    #                                                   ((img_wid - img_overlap) / first_angle), rtt_l)
+    #             pre_center_ra_colum = cord_t_c_dec_by_z.ra.value
+    #             # pre_center_dec_colum = cord_t_c_dec_by_z.dec.value
+    #             temp_center_coordinates.append([pre_center_ra_colum, pre_center_dec_colum])
+    #         temp_center_coordinates.reverse()
+    #         pre_center_ra_colum = row_center_ra
+    #         pre_center_dec_colum = row_center_dec
+    #         for j in range(half_colum):
+    #             # rtt_l = np.array([0, 0, 1])
+    #             # rtt_r = np.array([0, 0, -1])
+    #             rtt_l, rtt_r, rtt_t, rtt_b = get_rotate_fix_axis(pre_center_ra_colum, pre_center_dec_colum)
+    #             first_angle = 1
+    #             if j == 0:
+    #                 first_angle = 2
+    #             cord_t_c_dec_by_z = get_right_fix_axis(pre_center_ra_colum, pre_center_dec_colum,
+    #                                                    ((img_wid - img_overlap) / first_angle), rtt_r)
+    #             pre_center_ra_colum = cord_t_c_dec_by_z.ra.value
+    #             # pre_center_dec_colum = cord_t_c_dec_by_z.dec.value
+    #             temp_center_coordinates.append([pre_center_ra_colum, pre_center_dec_colum])
+    #         center_list.extend(temp_center_coordinates)
+    #     else:
+    #         half_colum = num_colum // 2
+    #         temp_center_coordinates = []
+    #         pre_center_ra_colum = row_center_ra
+    #         pre_center_dec_colum = row_center_dec
+    #         for j in range(half_colum):
+    #             # rtt_l = np.array([0, 0, 1])
+    #             # rtt_r = np.array([0, 0, -1])
+    #             rtt_l, rtt_r, rtt_t, rtt_b = get_rotate_fix_axis(pre_center_ra_colum, pre_center_dec_colum)
+    #             cord_t_c_dec_by_z = get_left_fix_axis(pre_center_ra_colum, pre_center_dec_colum,
+    #                                                   (img_wid - img_overlap), rtt_l)
+    #             pre_center_ra_colum = cord_t_c_dec_by_z.ra.value
+    #             # pre_center_dec_colum = cord_t_c_dec_by_z.dec.value
+    #             temp_center_coordinates.append([pre_center_ra_colum, pre_center_dec_colum])
+    #         temp_center_coordinates.reverse()
+    #         temp_center_coordinates.append([row_center_ra, row_center_dec])
+    #         pre_center_ra_colum = row_center_ra
+    #         pre_center_dec_colum = row_center_dec
+    #         for j in range(half_colum):
+    #             # rtt_l = np.array([0, 0, 1])
+    #             # rtt_r = np.array([0, 0, -1])
+    #             rtt_l, rtt_r, rtt_t, rtt_b = get_rotate_fix_axis(pre_center_ra_colum, pre_center_dec_colum)
+    #             cord_t_c_dec_by_z = get_right_fix_axis(pre_center_ra_colum, pre_center_dec_colum,
+    #                                                    (img_wid - img_overlap), rtt_r)
+    #             pre_center_ra_colum = cord_t_c_dec_by_z.ra.value
+    #             # pre_center_dec_colum = cord_t_c_dec_by_z.dec.value
+    #             temp_center_coordinates.append([pre_center_ra_colum, pre_center_dec_colum])
+    #         center_list.extend(temp_center_coordinates)
 
     # 计算四角点
     for i in range(len(center_list)):
