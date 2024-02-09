@@ -260,6 +260,11 @@
                     <i class="fas fa-check-circle">加载 GY7</i>
                   </button>
             </div>
+            <div class="col-md-2">
+                  <button id="load-from-jgg-button" class="btn btn-default">
+                    <i class="fas fa-check-circle">加载 jgg</i>
+                  </button>
+            </div>
         </div>
 
         <div class="row">
@@ -394,8 +399,8 @@
             let temp_col_count = 1;
             {#temp_col_count = Math.floor(360 / temp_image_w);#}
             let temp_image_w_alpa = temp_image_w * (1 / Math.cos(temp_center_dec_rad))
-            console.log("cos" +  Math.cos(temp_center_dec_rad)  + "   1 cos" + (1 / Math.cos(temp_center_dec_rad)));
-            console.log("alpa" + temp_center_dec_rad);
+            {#console.log("cos" +  Math.cos(temp_center_dec_rad)  + "   1 cos" + (1 / Math.cos(temp_center_dec_rad)));#}
+            {#console.log("alpa" + temp_center_dec_rad);#}
             temp_col_count = Math.ceil(360 / (temp_image_w_alpa - temp_overlap_using));
             {#temp_col_count = Math.ceil(360 / (temp_image_w - temp_overlap_using));#}
             if(temp_overlap_angle_level_deg > 50 ){
@@ -409,8 +414,8 @@
             $("#y_col_val").val(temp_col_count);
             $("#x_cen_val").val(0);
             $("#y_cen_val").val(temp_center_dec);
-            console.log("i=%{"+i+"}  count["+generate_num_north+"]  弧长对应夹角["+temp_image_w_alpa+"]  dec ["+temp_center_dec+"]");
-            console.log("rad=%{"+temp_center_dec_rad+"} 列数["+temp_col_count+"]   行数["+generate_num_north+"] 重叠【"+temp_overlap_using+"]" );
+            {#console.log("i=%{"+i+"}  count["+generate_num_north+"]  弧长对应夹角["+temp_image_w_alpa+"]  dec ["+temp_center_dec+"]");#}
+            {#console.log("rad=%{"+temp_center_dec_rad+"} 列数["+temp_col_count+"]   行数["+generate_num_north+"] 重叠【"+temp_overlap_using+"]" );#}
             if($('#do-generate').is(":checked"))
             {
                 $("#draw-sun-button").click();
@@ -746,6 +751,31 @@
 
           }).fail(function() { toastr.error('服务器错误'); });
        });
+       $("#load-from-jgg-button").on("click",function (){
+          let overlap_temp = $("#overlap_val").val();
+          let x_row_temp = $("#x_row_val").val();
+          let y_col_temp = $("#y_col_val").val();
+          let x_img_temp = $("#x_img_val").val();
+          let y_img_temp = $("#y_img_val").val();
+          let x_cen_temp = $("#x_cen_val").val();
+          let y_cen_temp = $("#y_cen_val").val();
+           $.getJSON( "draw_load_jgg_plan", {req_overlap_deg:overlap_temp, req_row_int:x_row_temp, req_col_int:y_col_temp,
+              req_x_img_deg:x_img_temp, req_y_img_deg:y_img_temp,req_ra_deg:x_cen_temp,req_dec_deg:y_cen_temp}
+               , function( data ) {
+            let plan_area_jgg = data.areas_jgg;
+            console.log("len:  " + plan_area_jgg.length)
+            for(let i = 0; i < plan_area_jgg.length; i++){
+                let jgg_item = plan_area_jgg[i];
+                let overlay_areas = A.graphicOverlay({name: 'areas', color: randomHexColor(), lineWidth: 1});
+                aladin.addOverlay(overlay_areas);
+                console.log("len:  " + jgg_item.length)
+                for(let j = 0; j < jgg_item.length; j++){
+                    overlay_areas.addFootprints([A.polygon(jgg_item[j])]);
+                }
+            }
+
+          }).fail(function() { toastr.error('服务器错误'); });
+       });
        $("#combine-jgg-button").on("click",function (){
           let overlap_temp = $("#overlap_val").val();
           let x_row_temp = $("#x_row_val").val();
@@ -773,7 +803,7 @@
 		   let markerLayer_cen = A.catalog({name: 'Center', sourceSize: 10,color: '#88a1fd'});
            for(let i = 0; i < data.centers_jgg.length; i++){
                 let centers_data = data.centers_jgg[i];
-                console.log(centers_data);
+                {#console.log(centers_data);#}
                 for(let i = 0; i < centers_data.length; i++) {
                     let marker_cen_item = A.marker(centers_data[i][0], centers_data[i][1], {popupTitle: 'Cen', popupDesc: centers_data[i][0]+'  '+centers_data[i][1]});
                     markerLayer_cen.addSources([marker_cen_item]);
