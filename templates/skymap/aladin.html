@@ -241,6 +241,13 @@
         </div>
         <div class="row">
             <div class="col-md-2">
+                <button id="manual-gen-kats-button" class="btn btn-default" data-sysname="kats">
+                    <i class="fas fa-check-circle">手动九宫格 KATS</i>
+                </button>
+            </div>
+        </div>
+        <div class="row">
+            <div class="col-md-2">
                   <button id="load-from-kats-button" class="btn btn-default">
                     <i class="fas fa-check-circle">加载 KATS</i>
                   </button>
@@ -424,6 +431,56 @@
         }
 
     }
+    function manual_generate_row_col(temp_image_w, temp_image_h){
+       $.getJSON( "clear_session_data", {}
+               , function( data ) {
+            toastr.warning('准备生成');
+       }).fail(function() { toastr.error('服务器错误'); });
+        let start_deg = 0.0;
+        let generate_num_north = 30;
+        let overlap_hi_array = [0.003,0.003,0.003,0.003,0.003,0.003,
+                                0.003,0.003,0.003,0.003,0.003,0.003,
+                                0.003,0.003,0.003,0.003,0.003,0.003,
+                                0.003,0.003,0.003,0.003,0.003,0.003,
+                                0.003,0.003,0.003,0.003,0.003,0.003,
+        ];
+        let overlap_wid_array = [0.003,0.0055,0.0128,0.0231,0.0405,0.0629,
+                                 0.001,0.0347,0.0729,0.0201,0.0705,0.1229,
+                                 0.081,0.1460,0.2159,0.0221,0.1080,0.1990,
+                                 0.041,0.1495,0.2627,0.0245,0.1615,0.3030, //75------------------
+                                 0.020,0.0705,0.1229,0.0201,0.0705,0.1229,
+        ];
+        let col_array = [108,108,108,108,108,108,
+                         105,105,105,102,102,102,
+                         99,99,99,91,91,91,
+                         84,84,84,75,75,75,
+                         66,66,66,57,57,57,
+        ];
+        for (let i=0;i<generate_num_north;i++){
+            if(i<21 || i >= 24){
+                {#continue;#}
+            }
+            let temp_overlap_wid_using = overlap_wid_array[i] ;
+            let temp_center_dec = start_deg + (temp_image_h - overlap_hi_array[i]) * i;
+            let temp_row_count = 1;
+            let temp_col_count = col_array[i];
+            $("#x_img_val").val(temp_image_w);
+            $("#y_img_val").val(temp_image_h);
+            $("#overlap_val").val(temp_overlap_wid_using);
+            $("#x_row_val").val(temp_row_count);
+            $("#y_col_val").val(temp_col_count);
+            $("#x_cen_val").val(0);
+            $("#y_cen_val").val(temp_center_dec);
+            console.log("i=%{"+i+"}  count["+generate_num_north+"] ");
+            console.log("rad=%{} 列数["+temp_col_count+"]   行数["+generate_num_north+"] 重叠 w["
+                +temp_overlap_wid_using+"] 重叠h [" + overlap_hi_array[i] +"]" );
+
+            $("#draw-sun-button").click();
+
+
+        }
+
+    }
     function onClickAladin() {
         let raDec = aladin.getRaDec();
         $("#x_cen_val").val(raDec[0]);
@@ -577,7 +634,7 @@
 			aladin.addCatalog(markerLayer_moon_curve);
 			markerLayer_moon_curve.addSources(markers_moon);
 
-            return;
+            {#return;#}
             let plan_area = data.areas;
             let overlay_areas = A.graphicOverlay({name: 'areas', color: '#8ebd84', lineWidth: 1});
             aladin.addOverlay(overlay_areas);
@@ -716,6 +773,10 @@
        $("#switch-to-kats-button").on("click",function (){
             current_sys_name = $('#switch-to-kats-button').data('sysname');
             calc_row_col(dic_sys_name_params["kats"]["img_w"], dic_sys_name_params["kats"]["img_h"]);
+       });
+       $("#manual-gen-kats-button").on("click",function (){
+            current_sys_name = $('#switch-to-kats-button').data('sysname');
+            manual_generate_row_col(dic_sys_name_params["kats"]["img_w"], dic_sys_name_params["kats"]["img_h"]);
        });
        $("#switch-to-east-button").on("click",function (){
             current_sys_name = $('#switch-to-east-button').data('sysname');
