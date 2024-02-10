@@ -431,6 +431,45 @@
         }
 
     }
+    function calc_row_col_jgg(temp_image_w, temp_image_h){
+       $.getJSON( "clear_session_data", {}
+               , function( data ) {
+            toastr.warning('准备生成');
+       }).fail(function() { toastr.error('服务器错误'); });
+
+        let start_deg = 0.0;
+        let end_deg = 85.0;
+        let dec_wid = end_deg - start_deg;
+        let generate_num_north = Math.floor(dec_wid / temp_image_h);
+        generate_num_north = (generate_num_north / 3 ) * 3;
+        let jgg_row_count = generate_num_north/3;
+
+        for (let i=0;i<jgg_row_count;i++){
+            for(let j=0;j<3;j++){
+                let temp_center_dec = start_deg + temp_image_h * i + (temp_image_h*(j-1));
+                let temp_row_count = 1;
+                let temp_col_count = temp_col_count = Math.ceil(360 / temp_image_w);
+                //todo 计算中心左右两点的经度差a 用360/a 得到数量
+                temp_col_count = (temp_col_count / 3) * 3;
+
+                $("#x_img_val").val(temp_image_w);
+                $("#y_img_val").val(temp_image_h);
+                $("#overlap_val").val("0");
+                $("#x_row_val").val(temp_row_count);
+                $("#y_col_val").val(temp_col_count);
+                $("#x_cen_val").val(0);
+                $("#y_cen_val").val(temp_center_dec);
+                {#console.log("i=%{"+i+"}  count["+generate_num_north+"]  弧长对应夹角["+temp_image_w_alpa+"]  dec ["+temp_center_dec+"]");#}
+                {#console.log("rad=%{"+temp_center_dec_rad+"} 列数["+temp_col_count+"]   行数["+generate_num_north+"] 重叠【"+temp_overlap_using+"]" );#}
+                if($('#do-generate').is(":checked"))
+                {
+                    $("#draw-sun-button").click();
+                }
+            }
+
+        }
+
+    }
     function manual_generate_row_col(temp_image_w, temp_image_h){
        $.getJSON( "clear_session_data", {}
                , function( data ) {
