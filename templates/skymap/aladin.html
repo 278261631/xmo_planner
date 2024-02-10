@@ -448,22 +448,22 @@
         ];
         let overlap_wid_array = [0.003,0.0055,0.0128,0.0231,0.0405,0.0629,
                                  0.001,0.0347,0.0729,0.0201,0.0705,0.1229,
-                                 0.081,0.1460,0.2159,0.0221,0.1080,0.1990,
+                                 0.081,0.1460,0.2159,0.0931,0.1773,0.2662,
                                  0.041,0.1495,0.2627,0.0245,0.1615,0.3030,
                                  0.055,0.2260,0.4017,0.1451,0.3585,0.5765,
-                                 0.115,0.4015,0.6925,0.1190,0.5282,0.9420,  
+                                 0.115,0.4015,0.6925,0.1190,0.5282,0.9420,
                                  0.176,0.8485,1.5250
         ];
         let col_array = [108,108,108,108,108,108,
                          105,105,105,102,102,102,
-                         99,99,99,91,91,91,
+                         99,99,99,93,93,93,
                          84,84,84,75,75,75,
                          66,66,66,57,57,57,
                          45,45,45,33,33,33,
                          21,21,21
         ];
         for (let i=0;i<generate_num_north;i++){
-            if(i<36 || i >= 39){
+            if(i<15 || i >= 18){
                 {#continue;#}
             }
             let temp_overlap_wid_using = overlap_wid_array[i] ;
@@ -648,7 +648,7 @@
                 {#console.log(plan_area[i]);#}
                 {#let overlay_areas = A.graphicOverlay({name: 'a_'+i, color: '#8ebd84', lineWidth: 2});#}
                 {#aladin.addOverlay(overlay_areas);#}
-                overlay_areas.addFootprints([A.polygon(plan_area[i])]);
+              //  overlay_areas.addFootprints([A.polygon(plan_area[i])]);
 
                 {#for(let j=0; j<plan_area[i].length; j++ ){#}
                 {#    let marker_cor = A.marker(plan_area[i][j][0], plan_area[i][j][1], {popupTitle: 'Cen', popupDesc: plan_area[i][j][0]+'  '+plan_area[i][j][1]});#}

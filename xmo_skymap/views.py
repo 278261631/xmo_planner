@@ -757,7 +757,8 @@ def draw_load_jgg_plan(request):
 
     square_list = []
     center_list = []
-    east_region_file = "E:/test/gy7_20240209_223114_CST.txt"
+    east_region_file = "E:/test/kats_20240210_180626_CST.txt"
+    # east_region_file = "E:/test/SkyRegion_EAST.txt"
     # 打开文件
     with open(east_region_file, 'r') as file:
         # 初始化RA和DEC列表
@@ -849,74 +850,87 @@ def generate_jgg_from_session(request):
     dot_status_list = []
     all_sky_center_list_sorted = sorted(all_sky_center_list, key=lambda x: x[0][1])
     print("***** jgg [%s]" % (len(new_jgg_list)))
-    next_index_r01 = 0
-    next_index_r02 = 1
-    next_index_r03 = 2
-    next_index_r11 = 0
-    next_index_r12 = 1
-    next_index_r13 = 2
-    next_index_r21 = 0
-    next_index_r22 = 1
-    next_index_r23 = 2
-    row_cell_leap_0 = 0
-    row_cell_leap_1 = 0
-    row_cell_leap_2 = 0
-    # 九宫格如果位移量太大 就要跳过一格 本格留空 不使用
-    img_hei_over_shift = img_wid_hei_list[1] / 2
-    img_wid_over_shift = img_wid_hei_list[0] / 2
-    for search_index in range(max_search_row_index):
-
-        row_item_jdd_0 = all_sky_center_list_sorted[3 * search_index]
-        row_item_jdd_1 = all_sky_center_list_sorted[3 * search_index+1]
-        row_item_jdd_2 = all_sky_center_list_sorted[3 * search_index+2]
-        while True:
-            if next_index_r03 >= len(row_item_jdd_0) or next_index_r13 >= len(row_item_jdd_1) or next_index_r23 >= len(row_item_jdd_2):
-                next_index_r01 = 0
-                next_index_r02 = 1
-                next_index_r03 = 2
-                next_index_r11 = 0
-                next_index_r12 = 1
-                next_index_r13 = 2
-                next_index_r21 = 0
-                next_index_r22 = 1
-                next_index_r23 = 2
-                row_cell_leap_0 = 0
-                row_cell_leap_1 = 0
-                row_cell_leap_2 = 0
-                break
-            row_cell_leap_0 = 0
-            row_cell_leap_1 = 0
-            row_cell_leap_2 = 0
-            jgg_item = [row_item_jdd_0[next_index_r01], row_item_jdd_0[next_index_r02], row_item_jdd_0[next_index_r03],
-                        row_item_jdd_1[next_index_r11], row_item_jdd_1[next_index_r12], row_item_jdd_1[next_index_r13],
-                        row_item_jdd_2[next_index_r21], row_item_jdd_2[next_index_r22], row_item_jdd_2[next_index_r23]]
+    # 基于手动九宫格的拼接
+    for search_index_jgg in range(max_search_row_index):
+        print("***** jgg row-- [%s]" % (len(all_sky_center_list)))
+        row_item_jdd_0 = all_sky_center_list_sorted[3 * search_index_jgg]
+        row_item_jdd_1 = all_sky_center_list_sorted[3 * search_index_jgg+1]
+        row_item_jdd_2 = all_sky_center_list_sorted[3 * search_index_jgg+2]
+        print("***** jgg col-- [%s]" % (len(row_item_jdd_0)))
+        for row_item_index in range(len(row_item_jdd_0)//3):
+            jgg_item = [row_item_jdd_0[3*row_item_index+0], row_item_jdd_0[3*row_item_index+1], row_item_jdd_0[3*row_item_index+2],
+                        row_item_jdd_1[3*row_item_index+0], row_item_jdd_1[3*row_item_index+1], row_item_jdd_1[3*row_item_index+2],
+                        row_item_jdd_2[3*row_item_index+0], row_item_jdd_2[3*row_item_index+1], row_item_jdd_2[3*row_item_index+2]]
             new_jgg_list.append(jgg_item)
-            shift_dec_in_rad = math.radians(row_item_jdd_1[next_index_r11][1])
-            shift_grow_function = math.sin(shift_dec_in_rad)*math.sin(shift_dec_in_rad)
-            img_wid_over_shift = img_wid_hei_list[0] / 2 + (shift_grow_function * 6)
-            # while abs(row_item_jdd_0[next_index_r01+3][0] - row_item_jdd_2[next_index_r21+3][0]) > img_wid_over_shift:
-            #     row_cell_leap_0 = row_cell_leap_0 + 1
-            # while abs(row_item_jdd_1[next_index_r11+3][0] - row_item_jdd_2[next_index_r21+3][0]) > img_wid_over_shift:
-            #     row_cell_leap_1 = row_cell_leap_1+1
-            # if next_index_r21+3 >= len(row_item_jdd_2) or next_index_r01+3 >= len(row_item_jdd_0):
-            #     break
-            # if abs(row_item_jdd_2[next_index_r21+3][0] - row_item_jdd_0[next_index_r01+3][0]) > img_wid_over_shift:
-            #     row_cell_leap_0 = row_cell_leap_0+1
-            # if abs(row_item_jdd_2[next_index_r21+3][0] - row_item_jdd_1[next_index_r11+3][0]) > img_wid_over_shift:
-            #     row_cell_leap_1 = row_cell_leap_1+1
-            if abs(row_item_jdd_2[next_index_r21][0] - row_item_jdd_0[next_index_r01][0]) > img_wid_over_shift:
-                row_cell_leap_0 = row_cell_leap_0+1
-            if abs(row_item_jdd_2[next_index_r21][0] - row_item_jdd_1[next_index_r11][0]) > img_wid_over_shift:
-                row_cell_leap_1 = row_cell_leap_1+1
-            next_index_r01 = next_index_r01 + 3 + row_cell_leap_0
-            next_index_r02 = next_index_r02 + 3 + row_cell_leap_0
-            next_index_r03 = next_index_r03 + 3 + row_cell_leap_0
-            next_index_r11 = next_index_r11 + 3 + row_cell_leap_1
-            next_index_r12 = next_index_r12 + 3 + row_cell_leap_1
-            next_index_r13 = next_index_r13 + 3 + row_cell_leap_1
-            next_index_r21 = next_index_r21 + 3 + row_cell_leap_2
-            next_index_r22 = next_index_r22 + 3 + row_cell_leap_2
-            next_index_r23 = next_index_r23 + 3 + row_cell_leap_2
+    # # 一种不稳定行列数的拼接
+    # next_index_r01 = 0
+    # next_index_r02 = 1
+    # next_index_r03 = 2
+    # next_index_r11 = 0
+    # next_index_r12 = 1
+    # next_index_r13 = 2
+    # next_index_r21 = 0
+    # next_index_r22 = 1
+    # next_index_r23 = 2
+    # row_cell_leap_0 = 0
+    # row_cell_leap_1 = 0
+    # row_cell_leap_2 = 0
+    # # 九宫格如果位移量太大 就要跳过一格 本格留空 不使用
+    # img_hei_over_shift = img_wid_hei_list[1] / 2
+    # img_wid_over_shift = img_wid_hei_list[0] / 2
+    # for search_index in range(max_search_row_index):
+    #
+    #     row_item_jdd_0 = all_sky_center_list_sorted[3 * search_index]
+    #     row_item_jdd_1 = all_sky_center_list_sorted[3 * search_index+1]
+    #     row_item_jdd_2 = all_sky_center_list_sorted[3 * search_index+2]
+    #     while True:
+    #         if next_index_r03 >= len(row_item_jdd_0) or next_index_r13 >= len(row_item_jdd_1) or next_index_r23 >= len(row_item_jdd_2):
+    #             next_index_r01 = 0
+    #             next_index_r02 = 1
+    #             next_index_r03 = 2
+    #             next_index_r11 = 0
+    #             next_index_r12 = 1
+    #             next_index_r13 = 2
+    #             next_index_r21 = 0
+    #             next_index_r22 = 1
+    #             next_index_r23 = 2
+    #             row_cell_leap_0 = 0
+    #             row_cell_leap_1 = 0
+    #             row_cell_leap_2 = 0
+    #             break
+    #         row_cell_leap_0 = 0
+    #         row_cell_leap_1 = 0
+    #         row_cell_leap_2 = 0
+    #         jgg_item = [row_item_jdd_0[next_index_r01], row_item_jdd_0[next_index_r02], row_item_jdd_0[next_index_r03],
+    #                     row_item_jdd_1[next_index_r11], row_item_jdd_1[next_index_r12], row_item_jdd_1[next_index_r13],
+    #                     row_item_jdd_2[next_index_r21], row_item_jdd_2[next_index_r22], row_item_jdd_2[next_index_r23]]
+    #         new_jgg_list.append(jgg_item)
+    #         shift_dec_in_rad = math.radians(row_item_jdd_1[next_index_r11][1])
+    #         shift_grow_function = math.sin(shift_dec_in_rad)*math.sin(shift_dec_in_rad)
+    #         img_wid_over_shift = img_wid_hei_list[0] / 2 + (shift_grow_function * 6)
+    #         # while abs(row_item_jdd_0[next_index_r01+3][0] - row_item_jdd_2[next_index_r21+3][0]) > img_wid_over_shift:
+    #         #     row_cell_leap_0 = row_cell_leap_0 + 1
+    #         # while abs(row_item_jdd_1[next_index_r11+3][0] - row_item_jdd_2[next_index_r21+3][0]) > img_wid_over_shift:
+    #         #     row_cell_leap_1 = row_cell_leap_1+1
+    #         # if next_index_r21+3 >= len(row_item_jdd_2) or next_index_r01+3 >= len(row_item_jdd_0):
+    #         #     break
+    #         # if abs(row_item_jdd_2[next_index_r21+3][0] - row_item_jdd_0[next_index_r01+3][0]) > img_wid_over_shift:
+    #         #     row_cell_leap_0 = row_cell_leap_0+1
+    #         # if abs(row_item_jdd_2[next_index_r21+3][0] - row_item_jdd_1[next_index_r11+3][0]) > img_wid_over_shift:
+    #         #     row_cell_leap_1 = row_cell_leap_1+1
+    #         if abs(row_item_jdd_2[next_index_r21][0] - row_item_jdd_0[next_index_r01][0]) > img_wid_over_shift:
+    #             row_cell_leap_0 = row_cell_leap_0+1
+    #         if abs(row_item_jdd_2[next_index_r21][0] - row_item_jdd_1[next_index_r11][0]) > img_wid_over_shift:
+    #             row_cell_leap_1 = row_cell_leap_1+1
+    #         next_index_r01 = next_index_r01 + 3 + row_cell_leap_0
+    #         next_index_r02 = next_index_r02 + 3 + row_cell_leap_0
+    #         next_index_r03 = next_index_r03 + 3 + row_cell_leap_0
+    #         next_index_r11 = next_index_r11 + 3 + row_cell_leap_1
+    #         next_index_r12 = next_index_r12 + 3 + row_cell_leap_1
+    #         next_index_r13 = next_index_r13 + 3 + row_cell_leap_1
+    #         next_index_r21 = next_index_r21 + 3 + row_cell_leap_2
+    #         next_index_r22 = next_index_r22 + 3 + row_cell_leap_2
+    #         next_index_r23 = next_index_r23 + 3 + row_cell_leap_2
 
     square_jgg_list = []
     print("***** new_jgg_list [%s]" % (len(new_jgg_list)))
