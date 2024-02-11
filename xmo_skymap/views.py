@@ -652,10 +652,12 @@ def draw_simple_jgg_plan(request):
         # rtt_r = np.array([0, 0, -1])
         jgg_0_center_ra_left = get_left_fix_axis(jgg_0_center_ra, jgg_0_center_dec, img_wid/2, rtt_l).ra.value
         jgg_0_center_ra_right = get_right_fix_axis(jgg_0_center_ra, jgg_0_center_dec, img_wid/2, rtt_r).ra.value
-        print("ra_l  [%s]  ra_r [%s]" % (jgg_0_center_ra_left, jgg_0_center_ra_right))
+        # print("ra_l  [%s]  ra_r [%s]" % (jgg_0_center_ra_left, jgg_0_center_ra_right))
         jgg_0_img_ra_cross = 360 - jgg_0_center_ra_right + jgg_0_center_ra_left
         # 计算当前行ra向九宫格个数
-        jgg_ra_row_count = math.floor(360 / jgg_0_img_ra_cross // 3)
+        # jgg_ra_row_count = 360 / jgg_0_img_ra_cross // 3
+        # 四舍五入 空白超过1.5个宽度就多加一个格子
+        jgg_ra_row_count = round(360 / jgg_0_img_ra_cross / 3)
         print("ra_l  [%s]  ra_r [%s]" % (jgg_0_center_ra_left, jgg_0_center_ra_right))
         print("row  [%s]  img_cross [%s] - jgg_count[%s]" % (i_jgg_dec_index, jgg_0_img_ra_cross, jgg_ra_row_count))
         for i_jgg_ra_index in range(jgg_ra_row_count):
@@ -710,14 +712,14 @@ def draw_simple_jgg_plan(request):
     time_str = current_time_with_tz.strftime('%Y%m%d_%H%M%S_%Z')
     out_path = os.path.join(output_root_path, "%s_%s.txt" % (req_sys_name, time_str))
 
-    temp_item_file_name = "temp_item.txt"
-    temp_list_file_name = "temp_list.txt"
+    temp_item_file_name = "temp_jgg_item.txt"
+    temp_list_file_name = "temp_jgg_list.txt"
     temp_item_file_path = os.path.join(template_root_path, temp_item_file_name)
     temp_list_file_path = os.path.join(template_root_path, temp_list_file_name)
     print("单目标模板：[%s]   计划文件模板：[%s]   输出文件:[%s]" % (temp_item_file_path, temp_list_file_path, out_path))
     print(temp_list_file_path)
     template_item_content = load_item_template(temp_item_file_path)
-    write_plan_file(temp_list_file_path, center_list, out_path, template_item_content)
+    write_jgg_plan_file(temp_list_file_path, all_jgg_list, out_path, template_item_content)
 
     return JsonResponse({'ex_message': ex_message,
                          'center_ra': str(center_ra.value), 'center_dec': str(center_dec.value),
@@ -863,7 +865,7 @@ def draw_load_jgg_plan(request):
 
     square_list = []
     center_list = []
-    east_region_file = "E:/test/kats_20240210_180626_CST.txt"
+    east_region_file = "E:/test/gy7_20240212_003522_CST.txt"
     # east_region_file = "E:/test/SkyRegion_EAST.txt"
     # 打开文件
     with open(east_region_file, 'r') as file:
