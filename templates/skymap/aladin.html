@@ -26,9 +26,9 @@
   <nav class="main-header navbar navbar-expand navbar-white navbar-light">
     <!-- Left navbar links -->
     <ul class="navbar-nav">
-      <li class="nav-item">
-        <a class="nav-link" data-widget="pushmenu" href="#" role="button"><i class="fas fa-bars"></i></a>
-      </li>
+{#      <li class="nav-item">#}
+{#        <a class="nav-link" data-widget="pushmenu" href="#" role="button"><i class="fas fa-bars"></i></a>#}
+{#      </li>#}
       <li class="nav-item d-none d-sm-inline-block">
         <a href="#" class="nav-link">Home</a>
       </li>
@@ -94,7 +94,7 @@
   <!-- /.navbar -->
 
   <!-- Main Sidebar Container -->
-  <aside class="main-sidebar sidebar-dark-primary elevation-4">
+  <aside class="main-sidebar sidebar-dark-primary elevation-4" style="display: none">
     <!-- Brand Logo -->
     <a href="#" class="brand-link">
       <img src="{% static 'dist/img/logo.png' %}" alt="" class="brand-image img-circle elevation-3" style="opacity: .8">
@@ -138,20 +138,41 @@
     <section class="content">
       <div class="container-fluid">
         <div class="row">
-          <div class="col-md-12">
+          <div class="col-md-8">
             <div class="card">
 {#              <div class="card-header">#}
 {#                <h3 class="card-title">aladin 星图</h3>#}
 {#              </div>#}
               <!-- /.card-header -->
               <div class="card-body">
-                  <div id="aladin-lite-div" style="width: 1000px; height: 600px"></div>
+                  <div id="aladin-lite-div" style="width: 1000px; height: 800px"></div>
               </div><!-- /.card-body -->
             </div>
             <!-- /.card -->
 
           </div>
           <!-- /.col -->
+        <div class="col-md-4">
+
+            <div class="row">
+                <div class="col-md-6">
+                    <div class="input-group-append">
+                        <label class="col-form-label" for="simple_dec_start_val"><i class="far  fa-arrows-v"></i>开始 dec</label>
+                        <input type="text" class="form-control is-warning" id="simple_dec_start_val" placeholder="开始 dec" value="0.0">
+                    </div>
+                    <div class="input-group-append">
+                        <label class="col-form-label" for="simple_dec_end_val"><i class="far  fa-arrows-v"></i>结束 dec</label>
+                        <input type="text" class="form-control is-warning" id="simple_dec_end_val" placeholder="结束 dec" value="10.0">
+                    </div>
+                </div>
+                <div class="col-md-2">
+                    <button id="simple-jgg-kats-button" class="btn btn-default" data-sysname="kats">
+                        <i class="fas fa-check-circle">简易九宫格 KATS</i>
+                    </button>
+
+                </div>
+            </div>
+        </div>
 
         </div>
         <!-- /.row -->
@@ -920,6 +941,30 @@
           }).fail(function() { toastr.error('服务器错误'); });
        });
 
+       $("#simple-jgg-kats-button").on("click",function (){
+          let dec_start_temp = $("#simple_dec_start_val").val();
+          let dec_end_temp = $("#simple_dec_end_val").val();
+          let x_img_temp = $("#x_img_val").val();
+          let y_img_temp = $("#y_img_val").val();
+          toastr.warning('准备生成');
+           $.getJSON( "draw_simple_jgg_plan", {req_dec_start_deg:dec_start_temp, req_dec_end_deg:dec_end_temp,
+              req_x_img_deg:x_img_temp, req_y_img_deg:y_img_temp}
+               , function( data ) {
+
+            let plan_area_jgg = data.areas_jgg;
+            console.log("len:  " + plan_area_jgg.length)
+            for(let i = 0; i < plan_area_jgg.length; i++){
+                let jgg_item = plan_area_jgg[i];
+                let overlay_areas = A.graphicOverlay({name: 'areas', color: randomHexColor(), lineWidth: 1});
+                aladin.addOverlay(overlay_areas);
+                console.log("len:  " + jgg_item.length)
+                for(let j = 0; j < jgg_item.length; j++){
+                    overlay_areas.addFootprints([A.polygon(jgg_item[j])]);
+                }
+            }
+            toastr.success('结果数目： ' +plan_area_jgg.length);
+          }).fail(function() { toastr.error('服务器错误'); });
+       });
         $("input[data-bootstrap-switch]").each(function(){
           $(this).bootstrapSwitch('state', $(this).prop('checked'));
         })

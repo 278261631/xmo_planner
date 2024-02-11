@@ -618,6 +618,112 @@ def draw_all_sky_by_jgg(request):
                          'areas': square_list, 'centers': center_list, 'out_path': out_path})
 
 
+# 九宫格 画全天
+def draw_simple_jgg_plan(request):
+    req_dec_start_deg = float(request.GET.get('req_dec_start_deg', 0.0))
+    req_dec_end_deg = float(request.GET.get('req_dec_end_deg', 10.0))
+    req_x_img = float(request.GET.get('req_x_img_deg', 2.1))
+    req_y_img = float(request.GET.get('req_y_img_deg', 4.2))
+    req_ra_cen_deg = float(request.GET.get('req_ra_deg', 0.0))
+    req_dec_cen_deg = float(request.GET.get('req_dec_deg', 0.0))
+    req_sys_name = request.GET.get('req_sys_name', "xmo_auto_")
+    ex_message = ''
+
+    # 起始中心坐标（示例坐标，你可以根据实际需要修改）
+    center_ra = req_ra_cen_deg * u.deg
+    center_dec = req_dec_cen_deg * u.deg
+
+    square_jgg_list = []
+    center_list = []
+    img_wid = req_x_img
+    img_hei = req_y_img
+
+    # 计算dec向九宫格个数
+    jgg_dec_count = math.floor(((req_dec_end_deg - req_dec_start_deg) / img_hei) / 3)
+    print("jgg_dec_count  [%s]  req_dec_end_deg [%s] - req_dec_start_deg[%s]" % (jgg_dec_count, req_dec_end_deg, req_dec_start_deg))
+    all_jgg_list = []
+    for i_jgg_dec_index in range(jgg_dec_count):
+        # 计算当前jgg中心第一坐标
+        jgg_0_center_ra = 0
+        jgg_0_center_dec = req_dec_start_deg + (3 * img_hei * i_jgg_dec_index)
+        # 计算当前jgg中心第一坐标跨度
+        rtt_l, rtt_r, rtt_t, rtt_b = get_rotate_fix_axis(jgg_0_center_ra, jgg_0_center_dec)
+        # rtt_l = np.array([0, 0, 1])
+        # rtt_r = np.array([0, 0, -1])
+        jgg_0_center_ra_left = get_left_fix_axis(jgg_0_center_ra, jgg_0_center_dec, img_wid/2, rtt_l).ra.value
+        jgg_0_center_ra_right = get_right_fix_axis(jgg_0_center_ra, jgg_0_center_dec, img_wid/2, rtt_r).ra.value
+        print("ra_l  [%s]  ra_r [%s]" % (jgg_0_center_ra_left, jgg_0_center_ra_right))
+        jgg_0_img_ra_cross = 360 - jgg_0_center_ra_right + jgg_0_center_ra_left
+        # 计算当前行ra向九宫格个数
+        jgg_ra_row_count = math.floor(360 / jgg_0_img_ra_cross // 3)
+        print("ra_l  [%s]  ra_r [%s]" % (jgg_0_center_ra_left, jgg_0_center_ra_right))
+        print("row  [%s]  img_cross [%s] - jgg_count[%s]" % (i_jgg_dec_index, jgg_0_img_ra_cross, jgg_ra_row_count))
+        for i_jgg_ra_index in range(jgg_ra_row_count):
+            jgg_0_center_ra_item = jgg_0_center_ra + (3 * jgg_0_img_ra_cross * i_jgg_ra_index)
+            jgg_0_center_dec_item = jgg_0_center_dec
+            # print("ra  [%s]  dec [%s] - " % (jgg_0_center_ra_item, jgg_0_center_dec_item))
+            jgg_item_list = [
+                [jgg_0_center_ra_item + (jgg_0_img_ra_cross*0), jgg_0_center_dec_item - img_hei],
+                [jgg_0_center_ra_item + (jgg_0_img_ra_cross*1), jgg_0_center_dec_item - img_hei],
+                [jgg_0_center_ra_item + (jgg_0_img_ra_cross*2), jgg_0_center_dec_item - img_hei],
+                [jgg_0_center_ra_item + (jgg_0_img_ra_cross*0), jgg_0_center_dec_item],
+                [jgg_0_center_ra_item + (jgg_0_img_ra_cross*1), jgg_0_center_dec_item],
+                [jgg_0_center_ra_item + (jgg_0_img_ra_cross*2), jgg_0_center_dec_item],
+                [jgg_0_center_ra_item + (jgg_0_img_ra_cross*0), jgg_0_center_dec_item + img_hei],
+                [jgg_0_center_ra_item + (jgg_0_img_ra_cross*1), jgg_0_center_dec_item + img_hei],
+                [jgg_0_center_ra_item + (jgg_0_img_ra_cross*2), jgg_0_center_dec_item + img_hei],
+            ]
+            all_jgg_list.append(jgg_item_list)
+
+    print("all jgg count: [%s] " % (len(all_jgg_list)))
+    # 计算四角点
+    for i_all_jgg in range(len(all_jgg_list)):
+        square_item_list=[]
+        for i_item_jgg in range(9):
+            cord_real_center = all_jgg_list[i_all_jgg][i_item_jgg]
+            center_list.append(cord_real_center)
+            rtt_l, rtt_r, rtt_t, rtt_b = get_rotate_fix_axis(cord_real_center[0], cord_real_center[1])
+            # rtt_l = np.array([0, 0, 1])
+            # rtt_r = np.array([0, 0, -1])
+            # print('[%s]  [%s]              [%s]   [%s]' % (i, j, center_ra_colum, center_dec_colum))
+            coordinates = []
+            cord_t_c_tm = get_top_fix_axis(cord_real_center[0], cord_real_center[1], (img_hei / 2), rtt_t)
+            cord_t_c_bm = get_bottom_fix_axis(cord_real_center[0], cord_real_center[1], (img_hei / 2), rtt_b)
+            cord_t_c_tl = get_left_fix_axis(cord_t_c_tm.ra.value, cord_t_c_tm.dec.value, (img_wid / 2), rtt_l)
+            cord_t_c_tr = get_right_fix_axis(cord_t_c_tm.ra.value, cord_t_c_tm.dec.value, (img_wid / 2), rtt_r)
+            cord_t_c_bl = get_left_fix_axis(cord_t_c_bm.ra.value, cord_t_c_bm.dec.value, (img_wid / 2), rtt_l)
+            cord_t_c_br = get_right_fix_axis(cord_t_c_bm.ra.value, cord_t_c_bm.dec.value, (img_wid / 2), rtt_r)
+            coordinates.append([cord_t_c_tl.ra.value, cord_t_c_tl.dec.value])
+            coordinates.append([cord_t_c_tr.ra.value, cord_t_c_tr.dec.value])
+            coordinates.append([cord_t_c_br.ra.value, cord_t_c_br.dec.value])
+            coordinates.append([cord_t_c_bl.ra.value, cord_t_c_bl.dec.value])
+            square_item_list.append(coordinates)
+        square_jgg_list.append(square_item_list)
+
+    # 获取当前时间
+    current_time = Time.now()
+    current_time_with_tz = current_time.to_datetime(pytz.timezone('Asia/Shanghai'))
+    print(f"当前时间：{current_time_with_tz.strftime('%Y-%m-%d %H:%M:%S %Z')}")
+
+    template_root_path = "e:/test"
+    output_root_path = "e:/test"
+    time_str = current_time_with_tz.strftime('%Y%m%d_%H%M%S_%Z')
+    out_path = os.path.join(output_root_path, "%s_%s.txt" % (req_sys_name, time_str))
+
+    temp_item_file_name = "temp_item.txt"
+    temp_list_file_name = "temp_list.txt"
+    temp_item_file_path = os.path.join(template_root_path, temp_item_file_name)
+    temp_list_file_path = os.path.join(template_root_path, temp_list_file_name)
+    print("单目标模板：[%s]   计划文件模板：[%s]   输出文件:[%s]" % (temp_item_file_path, temp_list_file_path, out_path))
+    print(temp_list_file_path)
+    template_item_content = load_item_template(temp_item_file_path)
+    write_plan_file(temp_list_file_path, center_list, out_path, template_item_content)
+
+    return JsonResponse({'ex_message': ex_message,
+                         'center_ra': str(center_ra.value), 'center_dec': str(center_dec.value),
+                         'areas_jgg': square_jgg_list, 'centers': center_list, 'out_path': out_path})
+
+
 def draw_load_plan(request):
     now_date = datetime.today().strftime('%Y%m%d')
     req_overlap = float(request.GET.get('req_overlap_deg', 0.2))
