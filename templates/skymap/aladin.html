@@ -900,7 +900,7 @@
                     overlay_areas.addFootprints([A.polygon(jgg_item[j])]);
                 }
             }
-
+            toastr.success('结果数目： ' +plan_area_jgg.length);
           }).fail(function() { toastr.error('服务器错误'); });
        });
        $("#combine-jgg-button").on("click",function (){

@@ -675,6 +675,10 @@ def draw_simple_jgg_plan(request):
                 [jgg_0_center_ra_item + (jgg_0_img_ra_cross*1), jgg_0_center_dec_item + img_hei],
                 [jgg_0_center_ra_item + (jgg_0_img_ra_cross*2), jgg_0_center_dec_item + img_hei],
             ]
+            for j_jgg_index in range(len(jgg_item_list)):
+                if jgg_item_list[j_jgg_index][0] >= 360:
+                    # RA hour angle check
+                    jgg_item_list[j_jgg_index][0] = jgg_item_list[j_jgg_index][0] - 360
             all_jgg_list.append(jgg_item_list)
 
     print("all jgg count: [%s] " % (len(all_jgg_list)))
