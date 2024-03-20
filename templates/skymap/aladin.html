@@ -14,7 +14,7 @@
   <link rel="stylesheet" href="{% static 'plugins/datatables-responsive/css/responsive.bootstrap4.min.css' %}">
   <link rel="stylesheet" href="{% static 'plugins/datatables-buttons/css/buttons.bootstrap4.min.css' %}">
   <link rel="stylesheet" href="{% static 'plugins/datatables-buttons/css/buttons.bootstrap4.min.css' %}">
-      <link rel="stylesheet" href="../../plugins/icheck-bootstrap/icheck-bootstrap.min.css">
+  <link rel="stylesheet" href="{% static 'plugins/icheck-bootstrap/icheck-bootstrap.min.css' %}">
   <link rel="stylesheet" href="{% static 'plugins/tempusdominus-bootstrap-4/css/tempusdominus-bootstrap-4.min.css' %}">
   <link rel="stylesheet" href="{% static 'plugins/fontawesome-free/css/all.min.css' %}">
   <link rel="stylesheet" href="{% static 'plugins/toastr/toastr.min.css' %}">
@@ -381,6 +381,25 @@
         "pat" : {"name":"PAT" ,"img_w":"1.95","img_h":"1.95"},
         "gy7" : {"name":"GY7" ,"img_w":"3.33333334","img_h":"2.216666667"},
     };
+
+    var overlays = {};
+
+    // 创建 overlay 并以名字存储
+    function createOverlay(name, color) {
+        var overlay = A.graphicOverlay({color: color, lineWidth: 2});
+        aladin.addOverlay(overlay);
+        overlays[name] = overlay;
+    }
+
+    // 根据名字更改 overlay 的颜色
+    function changeOverlayStyle(name, color) {
+        var overlay = overlays[name];
+        if (overlay) {
+            overlay.color = color;
+            aladin.removeOverlay(overlay);
+            aladin.addOverlay(overlay);
+        }
+    }
     function getRandomInt(min, max) {
       min = Math.ceil(min);
       max = Math.floor(max);
@@ -928,16 +947,28 @@
                , function( data ) {
 
             let plan_area_jgg = data.areas_jgg;
-            console.log("len:  " + plan_area_jgg.length)
+            console.log("len:  " + plan_area_jgg.length);
+            let area_colors = ["#8ebd84","#cc00ff","#83e5d6","#f8c67c"]
             for(let i = 0; i < plan_area_jgg.length; i++){
                 let jgg_item = plan_area_jgg[i];
-                let overlay_areas = A.graphicOverlay({name: 'areas', color: randomHexColor(), lineWidth: 1});
+                let overlay_areas = A.graphicOverlay({name: 'areas', color: area_colors[i%2], lineWidth: 1});
                 aladin.addOverlay(overlay_areas);
-                console.log("len:  " + jgg_item.length)
+                {#console.log("len:  " + jgg_item)#}
                 for(let j = 0; j < jgg_item.length; j++){
                     overlay_areas.addFootprints([A.polygon(jgg_item[j])]);
                 }
             }
+
+		   let markerLayer_cen = A.catalog({name: 'Center', sourceSize: 10,color: '#88a1fd'});
+           aladin.addCatalog(markerLayer_cen);
+           for(let i = 0; i < data.centers.length; i++){
+                let centers_data = data.centers[i];
+                {#console.log(centers_data);#}
+                let marker_cen_item = A.marker(centers_data[0], centers_data[1], {popupTitle: 'Cen', popupDesc: centers_data[0]+'  '+centers_data[1]});
+                markerLayer_cen.addSources([marker_cen_item]);
+
+           }
+
             toastr.success('结果数目： ' +plan_area_jgg.length);
             $('#out-plan-path').text(data.out_path.replace('\\','/'));
           }).fail(function() { toastr.error('服务器错误'); });

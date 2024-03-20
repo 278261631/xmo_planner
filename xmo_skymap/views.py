@@ -635,6 +635,8 @@ def draw_simple_jgg_plan(request):
 
     square_jgg_list = []
     center_list = []
+    square_jgg_list_jgg_square = []
+    center_list_jgg_middle = []
     img_wid = req_x_img
     img_hei = req_y_img
 
@@ -680,6 +682,7 @@ def draw_simple_jgg_plan(request):
                     # RA hour angle check
                     jgg_item_list[j_jgg_index][0] = jgg_item_list[j_jgg_index][0] - 360
             all_jgg_list.append(jgg_item_list)
+            center_list_jgg_middle.append(jgg_item_list[4])
 
     print("all jgg count: [%s] " % (len(all_jgg_list)))
     # 计算四角点
@@ -705,6 +708,8 @@ def draw_simple_jgg_plan(request):
             coordinates.append([cord_t_c_bl.ra.value, cord_t_c_bl.dec.value])
             square_item_list.append(coordinates)
         square_jgg_list.append(square_item_list)
+        square_jgg_list_jgg_square.append([[square_item_list[8][0], square_item_list[6][1], square_item_list[0][2]
+                                          , square_item_list[2][3]]])
 
     # 获取当前时间
     current_time = Time.now()
@@ -727,7 +732,10 @@ def draw_simple_jgg_plan(request):
 
     return JsonResponse({'ex_message': ex_message,
                          'center_ra': str(center_ra.value), 'center_dec': str(center_dec.value),
-                         'areas_jgg': square_jgg_list, 'centers': center_list, 'out_path': out_path})
+                         # 'areas_jgg_all': square_jgg_list,
+                         # 'centers': center_list
+                         'areas_jgg': square_jgg_list_jgg_square, 'centers': center_list_jgg_middle
+                        , 'out_path': out_path})
 
 
 def draw_load_plan(request):
