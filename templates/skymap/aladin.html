@@ -592,6 +592,13 @@
         $("#y_cen_val").val(raDec[1]);
         {#console.log("Double clicked at RA: " + raDec[0] + ", Dec: " + raDec[1]);#}
     }
+    let overlay_catalog = A.graphicOverlay({color: '#ee2345', lineWidth: 2});
+    function drawCatlogLine(lines){
+        for (let i = 0; i < lines.length; i++) {
+            overlay_catalog.add(A.polyline(lines[i]))
+        }
+
+    }
     A.init.then(() => {
         aladin = A.aladin('#aladin-lite-div', {fov: 180, projection: "AIT", fullScreen: false,
             expandLayersControl: false, cooFrame: 'equatorial', showProjectionControl: true,
@@ -628,13 +635,34 @@
             });
         }
 		
-		var overlay = A.graphicOverlay({color: '#ee2345', lineWidth: 2});
-        aladin.addOverlay(overlay);
-        overlay.add(A.ellipse(10.6833, 41.2669, 3.33333/2, 1.1798333/2, 35));
-		overlay.add(A.polyline([ [2.29452158, 59.14978110], [10.12683778, 56.53733116], [14.1772154, 60.7167403], [21.45396446, 60.23528403], [28.59885697, 63.67010079] ]));
-		overlay.add(A.polyline([ [165.929, 61.75],[165.45, 56.38],[178.45, 53.69],[183.85 , 57.032],[193.50 , 55.959],[200.98 , 54.925],[206.88 , 49.313]]));
-		overlay.add(A.polyline(data_cat_01.大熊[0]))
-		overlay.add(A.polyline(data_cat_02.小熊[0]))
+		{#let overlay = A.graphicOverlay({color: '#ee2345', lineWidth: 2});#}
+        {#aladin.addOverlay(overlay);#}
+        {#overlay.add(A.ellipse(10.6833, 41.2669, 3.33333/2, 1.1798333/2, 35));#}
+		{#overlay.add(A.polyline([ [2.29452158, 59.14978110], [10.12683778, 56.53733116], [14.1772154, 60.7167403], [21.45396446, 60.23528403], [28.59885697, 63.67010079] ]));#}
+		{#overlay.add(A.polyline([ [165.929, 61.75],[165.45, 56.38],[178.45, 53.69],[183.85 , 57.032],[193.50 , 55.959],[200.98 , 54.925],[206.88 , 49.313]]));#}
+		{#overlay.add(A.polyline(data_cat_01.大熊[0]))#}
+
+        aladin.addOverlay(overlay_catalog);
+        drawCatlogLine(data_cat_01.大熊)
+        drawCatlogLine(data_cat_02.小熊)
+        drawCatlogLine(data_cat_03.仙后)
+        drawCatlogLine(data_cat_04.猎户)
+        drawCatlogLine(data_cat_05.狮子)
+        drawCatlogLine(data_cat_06.飞马)
+        drawCatlogLine(data_cat_07.天鹅)
+        drawCatlogLine(data_cat_08.金牛)
+        drawCatlogLine(data_cat_09.白羊)
+        drawCatlogLine(data_cat_10.双子)
+        drawCatlogLine(data_cat_11.巨蟹)
+        drawCatlogLine(data_cat_12.室女)
+        drawCatlogLine(data_cat_13.天秤)
+        drawCatlogLine(data_cat_14.天蝎)
+        drawCatlogLine(data_cat_15.蛇夫)
+        drawCatlogLine(data_cat_16.射手)
+        drawCatlogLine(data_cat_17.摩羯)
+        drawCatlogLine(data_cat_18.宝瓶)
+        drawCatlogLine(data_cat_19.双鱼)
+
 
 		var marker1 = A.marker(0.1, 89.9, {popupTitle: '0.1 89.9', popupDesc: 'Object type: Pulsar'});
 		var marker2 = A.marker(1, 89, {popupTitle: 'HD 164514', popupDesc: 'Object type: Star in cluster'});
