@@ -678,14 +678,18 @@
 		markerLayer.addSources([ marker3]);
 
         {#aladin.on('click', onClickAladin);#}
+        /**
         aladin.on('click', function(e) {
             console.log('Clicked at RA, Dec:', e.ra, e.dec); // 打印被点击位置的赤经和赤纬
         });
         aladin.on('positionChanged', function(e) {
             {#console.log('View center has changed to:', e.ra, e.dec);#}
         });
+         **/
         aladin.on('footprintClicked', function(e) {
+             e.isSelected = !e.isSelected;
             console.log(e);
+            toastr.warning(e.isSelected);
         });
 
     });
@@ -889,9 +893,10 @@
        $("#clear-plan-squire-button").on("click",function (){
          aladin.removeLayers();
        });
+       /**
        $("#aladin-lite-div").on("dblclick",function (){
          onClickAladin();
-       });
+       });**/
        $("#switch-to-kats-button").on("click",function (){
             current_sys_name = $('#switch-to-kats-button').data('sysname');
             calc_row_col(dic_sys_name_params["kats"]["img_w"], dic_sys_name_params["kats"]["img_h"]);
@@ -1021,7 +1026,7 @@
                 {#aladin.addOverlay(overlay_areas);#}
                 {#console.log("len:  " + jgg_item)#}
                 for(let j = 0; j < jgg_item.length; j++){
-                    overlay_areas.addFootprints([A.polygon(jgg_item[j],{color:area_colors[i%2],lineWidth:8,name:'xxx'})]);
+                    overlay_areas.addFootprints([A.polygon(jgg_item[j],{color:area_colors[i%2],lineWidth:16,name:'xxx'})]);
                 }
             }
 
