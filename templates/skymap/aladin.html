@@ -590,7 +590,7 @@
         let raDec = aladin.getRaDec();
         $("#x_cen_val").val(raDec[0]);
         $("#y_cen_val").val(raDec[1]);
-        {#console.log("Double clicked at RA: " + raDec[0] + ", Dec: " + raDec[1]);#}
+        console.log("Double clicked at RA: " + raDec[0] + ", Dec: " + raDec[1]);
     }
     let overlay_catalog = A.graphicOverlay({color: '#ee2345', lineWidth: 2});
     function drawCatlogLine(lines){
@@ -677,7 +677,16 @@
 		aladin.addCatalog(markerLayer);
 		markerLayer.addSources([ marker3]);
 
-        aladin.on('click', onClickAladin);
+        {#aladin.on('click', onClickAladin);#}
+        aladin.on('click', function(e) {
+            console.log('Clicked at RA, Dec:', e.ra, e.dec); // 打印被点击位置的赤经和赤纬
+        });
+        aladin.on('positionChanged', function(e) {
+            {#console.log('View center has changed to:', e.ra, e.dec);#}
+        });
+        aladin.on('footprintClicked', function(e) {
+            console.log(e);
+        });
 
     });
     $(document).ready(function() {
@@ -1004,13 +1013,15 @@
             let plan_area_jgg = data.areas_jgg;
             console.log("len:  " + plan_area_jgg.length);
             let area_colors = ["#8ebd84","#cc00ff","#83e5d6","#f8c67c"]
+            let overlay_areas = A.graphicOverlay({name: 'areas', color: area_colors[0], lineWidth: 4});
+            aladin.addOverlay(overlay_areas);
             for(let i = 0; i < plan_area_jgg.length; i++){
                 let jgg_item = plan_area_jgg[i];
-                let overlay_areas = A.graphicOverlay({name: 'areas', color: area_colors[i%2], lineWidth: 1});
-                aladin.addOverlay(overlay_areas);
+                {#let overlay_areas = A.graphicOverlay({name: 'areas', color: area_colors[i%2], lineWidth: 4});#}
+                {#aladin.addOverlay(overlay_areas);#}
                 {#console.log("len:  " + jgg_item)#}
                 for(let j = 0; j < jgg_item.length; j++){
-                    overlay_areas.addFootprints([A.polygon(jgg_item[j])]);
+                    overlay_areas.addFootprints([A.polygon(jgg_item[j],{color:area_colors[i%2],lineWidth:8,name:'xxx'})]);
                 }
             }
 
